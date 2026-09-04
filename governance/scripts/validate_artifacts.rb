@@ -26,6 +26,7 @@ allowed_product_fields = schema.dig("properties", "product", "properties").keys
 allowed_runtime_fields = schema.dig("properties", "runtime", "properties").keys
 allowed_types = %w[html demo].freeze
 allowed_statuses = %w[draft review approved archived].freeze
+prd_required_statuses = %w[approved archived].freeze
 required_common = %w[
   schema_version id name deliverable_type status version owner updated_at product
 ].freeze
@@ -111,7 +112,11 @@ metadata_files.each do |metadata_file|
     errors << "#{relative_metadata}: unknown product fields: #{unknown_product.join(', ')}" unless unknown_product.empty?
 
     requirement = product["requirement"]
-    if relative_safe_path?(requirement)
+    if requirement.nil?
+      if prd_required_statuses.include?(status)
+        errors << "#{relative_metadata}: product.requirement is required when status is #{status}"
+      end
+    elsif relative_safe_path?(requirement)
       errors << "#{relative_metadata}: missing requirement file #{requirement}" unless root.join(requirement).file?
     else
       errors << "#{relative_metadata}: product.requirement must be a safe repository-relative path"

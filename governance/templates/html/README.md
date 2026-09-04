@@ -2,7 +2,7 @@
 
 ## 产品资料
 
-- 需求说明：`product/requirements/<artifact-id>.md`
+- 最终 PRD：进入 `approved` 前补充 `product/requirements/<artifact-id>.md`
 - 业务流程：如适用，在此补充链接。
 - 产品决策：如适用，在此补充链接。
 

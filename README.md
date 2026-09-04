@@ -52,7 +52,7 @@ cp -R governance/templates/html deliverables/<artifact-id>
 cp -R governance/templates/demo deliverables/<artifact-id>
 ```
 
-复制后必须修改 `artifact.yaml`、`README.md`，并在 `product/requirements/` 中建立对应需求说明。
+复制后必须修改 `artifact.yaml` 和 `README.md`。`draft`、`review` 阶段可以暂时没有 PRD；领导评审通过后，在 `product/requirements/` 中补充最终 PRD，并在成果进入 `approved` 前确认两者一致。
 
 ## 运行 Demo
 

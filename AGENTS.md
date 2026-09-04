@@ -22,6 +22,8 @@ Allowed product states are `draft`, `review`, `approved`, and `archived`. The st
 
 All deliverables on `main`, including drafts, must remain openable or independently runnable. Product maturity and runtime health are separate concerns.
 
+`product.requirement` is optional for `draft` and `review`. It is required for `approved` and `archived`, must point to an existing final PRD in the repository, and that PRD must match the confirmed prototype or demo version.
+
 ## Change workflow
 
 - Use a short-lived `codex/<artifact-id>-<change>` branch for Codex changes unless the user requests another name.

@@ -4,7 +4,7 @@
 
 1. 从模板创建交付成果，或修改已有成果。
 2. 使用 `codex/<成果标识>-<事项>` 形式的短期分支。
-3. 更新 `artifact.yaml`、成果 README 和相关产品文档。
+3. 更新 `artifact.yaml` 和成果 README；进入 `approved` 前补充最终 PRD。
 4. 在本地完成结构校验和运行验证。
 5. 通过 Pull Request 合并到 `main`。
 
@@ -54,4 +54,10 @@ ruby governance/scripts/validate_artifacts.rb --type demo
 
 ## 状态变更
 
-状态变更必须修改 `artifact.yaml` 并在 Pull Request 中说明依据。进入 `approved` 时，应创建对应的版本标签；进入 `archived` 时，应记录最后一个已验证版本和归档原因。
+状态变更必须修改 `artifact.yaml` 并在 Pull Request 中说明依据。
+
+- `draft`、`review`：`product.requirement` 可省略。
+- `approved`、`archived`：必须通过 `product.requirement` 关联存在的最终 PRD。
+- 进入 `approved` 前，应确认最终 PRD 与原型或 Demo 的确认版本一致。
+- 研发交底时，应创建对应的 `artifact/<artifact-id>/v<version>` 版本标签。
+- 进入 `archived` 时，应记录最后一个已验证版本和归档原因。

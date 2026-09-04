@@ -33,7 +33,6 @@
     "product": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["requirement"],
       "properties": {
         "requirement": { "type": "string", "minLength": 1 },
         "flow": { "type": "string", "minLength": 1 },
@@ -85,6 +84,17 @@
       "then": {
         "required": ["runtime"],
         "not": { "required": ["entrypoint"] }
+      }
+    },
+    {
+      "if": {
+        "properties": { "status": { "enum": ["approved", "archived"] } },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "product": { "required": ["requirement"] }
+        }
       }
     }
   ]
