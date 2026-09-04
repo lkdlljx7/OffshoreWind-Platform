@@ -1,0 +1,48 @@
+name: 产品需求
+description: 提交新的业务需求或现有需求变更
+title: "[需求] "
+labels:
+  - requirement
+body:
+  - type: input
+    id: deliverable
+    attributes:
+      label: 业务成果
+      description: 填写已有成果标识；新成果可填写建议标识。
+      placeholder: progress-management
+    validations:
+      required: true
+  - type: dropdown
+    id: deliverable_type
+    attributes:
+      label: 预期交付形式
+      options:
+        - HTML 原型
+        - 可运行 Demo
+        - 待评估
+    validations:
+      required: true
+  - type: textarea
+    id: background
+    attributes:
+      label: 背景与问题
+      description: 描述当前业务问题、用户和触发场景。
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: 目标与预期结果
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 验收标准
+      description: 使用可观察、可验证的条件描述完成标准。
+    validations:
+      required: true
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: 非目标与边界

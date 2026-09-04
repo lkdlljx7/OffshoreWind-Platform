@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/offshorewind/artifact.schema.json",
+  "title": "OffshoreWind deliverable metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "name",
+    "deliverable_type",
+    "status",
+    "version",
+    "owner",
+    "updated_at",
+    "product"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "name": { "type": "string", "minLength": 1 },
+    "deliverable_type": { "enum": ["html", "demo"] },
+    "status": { "enum": ["draft", "review", "approved", "archived"] },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "owner": { "type": "string", "minLength": 1 },
+    "updated_at": { "type": "string", "format": "date" },
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requirement"],
+      "properties": {
+        "requirement": { "type": "string", "minLength": 1 },
+        "flow": { "type": "string", "minLength": 1 },
+        "decisions": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "entrypoint": { "type": "string", "minLength": 1 },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workdir",
+        "start_command",
+        "stop_command",
+        "reset_command",
+        "url",
+        "healthcheck"
+      ],
+      "properties": {
+        "workdir": { "type": "string", "minLength": 1 },
+        "start_command": { "type": "string", "minLength": 1 },
+        "stop_command": { "type": "string", "minLength": 1 },
+        "reset_command": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "minLength": 1 },
+        "healthcheck": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "deliverable_type": { "const": "html" } },
+        "required": ["deliverable_type"]
+      },
+      "then": {
+        "required": ["entrypoint"],
+        "not": { "required": ["runtime"] }
+      }
+    },
+    {
+      "if": {
+        "properties": { "deliverable_type": { "const": "demo" } },
+        "required": ["deliverable_type"]
+      },
+      "then": {
+        "required": ["runtime"],
+        "not": { "required": ["entrypoint"] }
+      }
+    }
+  ]
+}

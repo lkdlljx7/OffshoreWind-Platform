@@ -1,0 +1,26 @@
+name: Validate HTML deliverables
+
+on:
+  pull_request:
+    paths:
+      - "deliverables/**"
+      - "governance/scripts/validate_artifacts.rb"
+      - ".github/workflows/validate-html.yml"
+  push:
+    branches: [main]
+    paths:
+      - "deliverables/**"
+      - "governance/scripts/validate_artifacts.rb"
+      - ".github/workflows/validate-html.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Validate HTML deliverable structure
+        run: ruby governance/scripts/validate_artifacts.rb --type html

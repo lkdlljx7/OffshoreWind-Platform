@@ -1,0 +1,15 @@
+schema_version: 1
+
+id: replace-with-artifact-id
+name: 替换为业务成果名称
+deliverable_type: html
+
+status: draft
+version: 0.1.0
+owner: 替换为负责人
+updated_at: 2026-09-04
+
+product:
+  requirement: product/requirements/replace-with-artifact-id.md
+
+entrypoint: implementation/index.html

@@ -1,0 +1,27 @@
+.DS_Store
+
+# Secrets and local configuration
+**/.env
+**/.env.*.local
+**/*.local
+
+# Dependencies and build output
+**/node_modules/
+**/dist/
+**/build/
+**/coverage/
+**/.cache/
+
+# Logs and runtime data
+**/*.log
+**/logs/
+**/tmp/
+**/.tmp/
+**/database/data/
+**/volumes/
+
+# Editor files
+.idea/
+.vscode/
+*.swp
+*~

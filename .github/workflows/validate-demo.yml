@@ -1,0 +1,29 @@
+name: Validate runnable demos
+
+on:
+  pull_request:
+    paths:
+      - "deliverables/**"
+      - "governance/scripts/**"
+      - ".github/workflows/validate-demo.yml"
+  push:
+    branches: [main]
+    paths:
+      - "deliverables/**"
+      - "governance/scripts/**"
+      - ".github/workflows/validate-demo.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Validate Demo structure
+        run: ruby governance/scripts/validate_artifacts.rb --type demo
+      - name: Start and smoke-test each Demo
+        run: bash governance/scripts/validate_demo_ci.sh

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>可运行 Demo 模板</title>
+    <style>
+      body { font-family: sans-serif; margin: 48px; color: #12343b; }
+      .status { padding: 16px; border-radius: 8px; background: #edf7f8; }
+    </style>
+  </head>
+  <body>
+    <h1>可运行 Demo 模板</h1>
+    <p>此页面由独立前端服务提供，并通过反向代理访问后端健康检查。</p>
+    <p id="status" class="status">正在检查后端……</p>
+    <script>
+      fetch("/api/health")
+        .then((response) => response.json())
+        .then((data) => {
+          document.querySelector("#status").textContent = `后端状态：${data.status}`;
+        })
+        .catch(() => {
+          document.querySelector("#status").textContent = "后端暂不可用";
+        });
+    </script>
+  </body>
+</html>

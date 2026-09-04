@@ -1,0 +1,44 @@
+name: 评审反馈
+description: 记录 HTML 原型或 Demo 的评审意见
+title: "[反馈] "
+labels:
+  - feedback
+body:
+  - type: input
+    id: deliverable
+    attributes:
+      label: 业务成果
+      placeholder: progress-management
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 评审版本
+      placeholder: 0.4.0
+    validations:
+      required: true
+  - type: textarea
+    id: scenario
+    attributes:
+      label: 评审场景
+      description: 说明角色、入口和操作路径。
+    validations:
+      required: true
+  - type: textarea
+    id: observation
+    attributes:
+      label: 反馈内容
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 优先级
+      options:
+        - 阻塞评审
+        - 高
+        - 中
+        - 低
+    validations:
+      required: true
