@@ -18,7 +18,9 @@
 
 ## 使用方式
 
-该成果是一个自包含 HTML 文件，可以直接打开：
+在线预览：<https://lkdlljx7.github.io/OffshoreWind-Platform/offshore-station-lower-foundation-progress/>
+
+本地使用时，该成果是一个自包含 HTML 文件，可以直接打开：
 
 ```text
 implementation/index.html

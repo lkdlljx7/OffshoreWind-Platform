@@ -15,7 +15,7 @@ HTML 原型与 Demo 是同层级的替代方案，不存在默认的先后开发
 
 | 业务成果 | 交付类型 | 产品状态 | 版本 | 负责人 | 使用方式 |
 |---|---|---|---|---|---|
-| 海上站下部基础建造进度管理 | HTML | 评审中 | v1.0.0 | Shawn | 打开 `deliverables/offshore-station-lower-foundation-progress/implementation/index.html` |
+| 海上站下部基础建造进度管理 | HTML | 评审中 | v1.0.0 | Shawn | [在线预览](https://lkdlljx7.github.io/OffshoreWind-Platform/offshore-station-lower-foundation-progress/) |
 
 ## 产品状态
 
@@ -73,3 +73,9 @@ Demo 必须同时提供停止、健康检查和数据重置脚本。完整标准
 - 未完成访问权限评审前，不启用 GitHub Pages 或其他公开发布。
 
 详细要求见 [安全与数据规范](governance/security-and-data.md)。
+
+## 在线预览
+
+允许公开访问的 HTML 成果登记在 `governance/pages-public.txt`。合并或提交到 `main` 后，GitHub Actions 会将登记成果自动发布到 [原型中心](https://lkdlljx7.github.io/OffshoreWind-Platform/)。
+
+只有经过明确公开确认的成果才能加入该清单；Demo 和未登记的 HTML 成果不会被发布。
