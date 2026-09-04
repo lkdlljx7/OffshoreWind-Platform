@@ -1,0 +1,15 @@
+schema_version: 1
+
+id: offshore-station-lower-foundation-progress
+name: 海上站下部基础建造进度管理
+deliverable_type: html
+
+status: review
+version: 1.0.0
+owner: Shawn
+updated_at: 2026-07-23
+
+product:
+  requirement: product/requirements/offshore-station-lower-foundation-progress.md
+
+entrypoint: implementation/index.html

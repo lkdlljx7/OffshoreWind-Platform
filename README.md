@@ -15,7 +15,7 @@ HTML 原型与 Demo 是同层级的替代方案，不存在默认的先后开发
 
 | 业务成果 | 交付类型 | 产品状态 | 版本 | 负责人 | 使用方式 |
 |---|---|---|---|---|---|
-| 暂无 | — | — | — | — | — |
+| 海上站下部基础建造进度管理 | HTML | 评审中 | v1.0.0 | Shawn | 打开 `deliverables/offshore-station-lower-foundation-progress/implementation/index.html` |
 
 ## 产品状态
 

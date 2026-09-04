@@ -1,0 +1,2155 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=1440" />
+  <title>海上换流站下部基础建造进度管理 · Demo</title>
+  <style>
+    /* ============== 设计令牌 ============== */
+    :root {
+      --brand-50:  #eaf3ff;
+      --brand-100: #d6e7ff;
+      --brand-200: #b6d3ff;
+      --brand-300: #82b4ff;
+      --brand-400: #4d92ff;
+      --brand-500: #1f6feb;   /* 主蓝 */
+      --brand-600: #195fc7;
+      --brand-700: #134ba0;
+      --brand-800: #0d3678;
+      --ink-1:  #1f2a44;   /* 主文字 */
+      --ink-2:  #4b5876;   /* 次文字 */
+      --ink-3:  #8693ad;   /* 弱化文字 */
+      --line-1: #e6ebf5;   /* 描边 */
+      --line-2: #eef2fa;
+      --bg-app: #f4f7fc;   /* 页面底色 */
+      --bg-card:#ffffff;
+      --bg-tag-soft:#eef4ff;
+      --green-500:#16a34a;
+      --green-50:#eafaf0;
+      --amber-500:#d97706;
+      --amber-50:#fff5e0;
+      --red-500:#dc2626;
+      --red-50:#ffeaea;
+      --gray-chip:#f1f4fb;
+      --shadow-1: 0 1px 2px rgba(20,40,90,.04), 0 4px 12px rgba(20,40,90,.04);
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --table-inline-space: 18px;
+      --modal-width: 720px;
+      --modal-height: 716px;
+      --form-column-gap: 24px;
+      --form-row-space: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink-1);
+      background: var(--bg-app);
+      font-size: 13px;
+      min-width: 1440px;
+    }
+    a { color: var(--brand-500); text-decoration: none; }
+    a:hover { color: var(--brand-700); }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* ============== 总体布局 ============== */
+    .app {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: 100vh;
+    }
+    .main { display: flex; flex-direction: column; min-width: 0; }
+    .content { padding: 16px 20px 24px; flex: 1; }
+
+    /* ============== 侧栏 ============== */
+    .sidebar {
+      background: linear-gradient(180deg, #1957c4 0%, #0f3e96 100%);
+      color: #e7efff;
+      padding: 18px 0 24px;
+      position: sticky; top: 0; height: 100vh;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,.22) transparent;
+    }
+    .brand {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 4px 16px 16px;
+      text-align: center;
+    }
+    .brand .logo {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(255,255,255,.12);
+      display: grid; place-items: center;
+      margin-bottom: 10px;
+    }
+    .brand .logo svg { width: 26px; height: 26px; }
+    .brand .name { font-size: 14px; font-weight: 600; letter-spacing: 1px; }
+    .side-group { padding: 8px 12px; }
+    .side-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 6px;
+      font-size: 13px; color: #c8d8ff;
+      cursor: pointer; user-select: none;
+    }
+    .side-item:hover { background: rgba(255,255,255,.06); color: #fff; }
+    .side-item.active {
+      background: rgba(255,255,255,.16);
+      color: #fff;
+    }
+    .side-item > span:first-of-type {
+      max-width: 9em;
+      overflow-wrap: anywhere;
+    }
+    .side-item .ico { width: 16px; height: 16px; flex: 0 0 16px; opacity: .9; }
+    .side-caret { margin-left: auto; opacity: .6; font-size: 10px; }
+    .side-item.fake { color: #d5e1ff; }
+    .side-item.fake .side-caret { font-size: 14px; line-height: 1; }
+
+    /* ============== 顶栏 ============== */
+    .topbar {
+      display: flex; align-items: center; gap: 14px;
+      padding: 10px 20px;
+      background: #fff;
+      border-bottom: 1px solid var(--line-1);
+    }
+    .topbar .collapse { color: var(--ink-2); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .crumb { color: var(--ink-2); }
+    .crumb .sep { margin: 0 8px; color: var(--ink-3); }
+    .crumb .cur { color: var(--brand-500); font-weight: 600; }
+    .topbar .right { margin-left: auto; display: flex; align-items: center; gap: 12px; color: var(--ink-2); }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 2px 10px; border-radius: 999px;
+      font-size: 12px;
+    }
+    .pill.ok { background: #e8f7ee; color: #1b8c4a; }
+    .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .avatar {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: linear-gradient(135deg, #4d92ff, #1f6feb);
+      color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 600;
+    }
+
+    /* ============== 页签 ============== */
+    .tabs {
+      display: flex; align-items: center; gap: 4px;
+      background: #fff;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--line-1);
+    }
+    .tab {
+      position: relative;
+      padding: 12px 16px;
+      font-size: 14px;
+      color: var(--ink-2);
+      cursor: pointer;
+      user-select: none;
+    }
+    .tab:hover { color: var(--brand-500); }
+    .tab.active { color: var(--brand-500); font-weight: 600; }
+    .tab.active::after {
+      content: ""; position: absolute; left: 12px; right: 12px; bottom: -1px;
+      height: 2px; background: var(--brand-500); border-radius: 2px;
+    }
+
+    /* ============== 卡片 ============== */
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-1);
+      border: 1px solid var(--line-1);
+    }
+    .card-head {
+      display: flex; align-items: center;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line-2);
+    }
+    .card-title { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+    .card-title .dot {
+      width: 14px; height: 14px; border-radius: 50%;
+      background: linear-gradient(135deg, #4d92ff, #1f6feb);
+      display: inline-grid; place-items: center; color: #fff; font-size: 9px;
+    }
+    .card-title .dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+    .card-body { padding: 16px 18px 20px; }
+    .card-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+    /* ============== 指标条 ============== */
+    .kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
+    .kpi {
+      background: #fff; border: 1px solid var(--line-1); border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .kpi .ico {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: var(--bg-tag-soft); color: var(--brand-500);
+      display: grid; place-items: center;
+    }
+    .kpi .label { color: var(--ink-2); font-size: 12px; }
+    .kpi .val { font-size: 22px; font-weight: 600; color: var(--ink-1); }
+    .kpi .sub { color: var(--ink-3); font-size: 12px; }
+
+    /* ============== 筛选 ============== */
+    .filters {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+      padding: 14px 18px;
+    }
+    .list-card > .filters { border-bottom: 1px solid var(--line-2); }
+    .list-card > .card-head { min-height: 58px; }
+    .field { display: flex; align-items: center; gap: 8px; }
+    .field label { color: var(--ink-2); font-size: 12px; }
+    .field .ctl {
+      height: 30px; min-width: 160px; padding: 0 10px;
+      background: #fff; border: 1px solid var(--line-1); border-radius: 4px;
+      color: var(--ink-1);
+    }
+    .field .ctl.short { min-width: 110px; }
+    .field .ctl::placeholder { color: var(--ink-3); }
+
+    /* ============== 按钮 ============== */
+    .btn {
+      height: 30px; padding: 0 14px; border-radius: 4px;
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1px solid var(--line-1); background: #fff; color: var(--ink-1);
+      font-size: 12px;
+    }
+    .btn:hover { color: var(--brand-500); border-color: var(--brand-300); }
+    .btn.primary { background: var(--brand-500); border-color: var(--brand-500); color: #fff; }
+    .btn.primary:hover { background: var(--brand-600); border-color: var(--brand-600); color: #fff; }
+    .btn.ghost { background: transparent; border-color: var(--brand-500); color: var(--brand-500); }
+    .btn.ghost:hover { background: var(--bg-tag-soft); }
+    .btn .plus { width: 12px; height: 12px; }
+
+    /* ============== 表格 ============== */
+    .table-wrap {
+      overflow: auto;
+      margin: 0 var(--table-inline-space);
+      border: 1px solid var(--line-2);
+      border-radius: 6px;
+      background: #fff;
+    }
+    table.t {
+      width: 100%; border-collapse: separate; border-spacing: 0;
+      font-size: 12.5px;
+    }
+    table.t thead th {
+      position: sticky; top: 0; z-index: 1;
+      background: #f3f7ff; color: var(--ink-2); font-weight: 500;
+      height: 42px; padding: 0 12px; text-align: center;
+      border-bottom: 1px solid var(--line-1);
+      white-space: nowrap; vertical-align: middle;
+    }
+    table.t tbody td {
+      height: 42px; padding: 0 12px; border-bottom: 1px solid var(--line-2);
+      color: var(--ink-1); white-space: nowrap;
+      text-align: center; vertical-align: middle;
+    }
+    table.t thead th:first-child,
+    table.t tbody td:first-child { padding-left: 16px; }
+    table.t thead th:last-child,
+    table.t tbody td:last-child { padding-right: 16px; }
+    table.t tbody tr:last-child td { border-bottom: 0; }
+    table.t tbody td.cb-cell,
+    table.t thead th:first-child { text-align: center; }
+    table.t tbody td.num { text-align: center; font-variant-numeric: tabular-nums; }
+    /* 表头数字列与数据列统一居中 */
+    table.t thead th.num { text-align: center; }
+    table.t tbody td.ctr { text-align: center; white-space: nowrap; }
+    table.t .ctr a + a { margin-left: 8px; }
+    table.t tbody td.ctr a { display: inline-block; }
+    table.t .op-group { display: inline-flex; align-items: center; justify-content: center; }
+    table.t tbody tr:hover td { background: #f7faff; }
+    table.t .danger { color: var(--red-500); }
+    /* 宽表固定序号和名称列，横向滚动时仍可识别当前记录。 */
+    table.t thead th:nth-child(1),
+    table.t tbody td:nth-child(1):not(.empty-cell) {
+      position: sticky; left: 0; width: 52px; min-width: 52px; max-width: 52px;
+      z-index: 2; background: #fff;
+    }
+    table.t thead th:nth-child(2),
+    table.t tbody td:nth-child(2) {
+      position: sticky; left: 52px; min-width: 140px;
+      z-index: 2; background: #fff;
+      box-shadow: 1px 0 0 var(--line-1);
+    }
+    table.t thead th:nth-child(1),
+    table.t thead th:nth-child(2) { z-index: 4; background: #f3f7ff; }
+    table.t tbody tr:hover td:nth-child(1):not(.empty-cell),
+    table.t tbody tr:hover td:nth-child(2) { background: #f7faff; }
+    table.t .empty-cell {
+      position: static; width: auto; min-width: 0; max-width: none;
+      height: 120px; color: var(--ink-3);
+    }
+
+    /* 复选框 */
+    .cb { width: 14px; height: 14px; }
+
+    /* 状态 */
+    .status {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 2px 8px; border-radius: 999px;
+      font-size: 12px;
+    }
+    .status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .status.gray   { color: var(--ink-2); background: var(--gray-chip); }
+    .status.blue   { color: var(--brand-600); background: var(--bg-tag-soft); }
+    .status.green  { color: var(--green-500); background: var(--green-50); }
+    .status.amber  { color: var(--amber-500); background: var(--amber-50); }
+    .status.red    { color: var(--red-500);   background: var(--red-50); }
+
+    /* 进度条 */
+    .bar { display: flex; align-items: center; gap: 8px; width: 150px; min-width: 150px; margin: 0 auto; }
+    .bar .track {
+      position: relative; height: 6px; flex: 1; background: #eef2fa; border-radius: 999px; overflow: hidden;
+    }
+    .bar .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--brand-500); border-radius: 999px; }
+    .bar .fill.green { background: var(--green-500); }
+    .bar .fill.amber { background: var(--amber-500); }
+    .bar .num { width: 38px; text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+
+    /* 重点关注标签 */
+    .star { color: #f59e0b; }
+
+    /* 分页 */
+    .pager {
+      display: flex; align-items: center; gap: 10px; padding: 10px 18px;
+      color: var(--ink-2); font-size: 12px;
+    }
+    .pager .right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+    .page {
+      min-width: 26px; height: 26px; padding: 0 8px; border-radius: 4px;
+      display: inline-grid; place-items: center; cursor: pointer;
+      background: #fff; border: 1px solid var(--line-1); color: var(--ink-2);
+    }
+    .page.cur { background: var(--brand-500); border-color: var(--brand-500); color: #fff; }
+    .page:hover { color: var(--brand-500); border-color: var(--brand-300); }
+    .page.cur:hover { color: #fff; }
+    .page:disabled { cursor: not-allowed; opacity: .45; color: var(--ink-3); border-color: var(--line-1); }
+
+    /* 摘要视图（总览用） */
+    .summary-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 14px; }
+    .summary-grid .left, .summary-grid .right { display: flex; flex-direction: column; gap: 14px; }
+    .ring {
+      display: flex; align-items: center; gap: 18px;
+    }
+    .ring svg { width: 130px; height: 130px; }
+    .ring .legend { display: grid; gap: 6px; font-size: 12px; color: var(--ink-2); }
+    .ring .legend .li { display: flex; align-items: center; gap: 8px; }
+    .ring .legend .sw { width: 10px; height: 10px; border-radius: 2px; }
+
+    .today-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 18px; }
+    .today-list .li { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+    .today-list .li .name { color: var(--ink-2); flex: 1; min-width: 0;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .today-list .li .pct { color: var(--brand-500); font-weight: 600; min-width: 40px; text-align: right; }
+
+    .stack-list { display: grid; gap: 8px; }
+    .stack-list .row { display: flex; align-items: center; gap: 10px; font-size: 12.5px; }
+    .stack-list .row .label { width: 64px; color: var(--ink-2); }
+    .stack-list .row .track { flex: 1; height: 8px; background: #eef2fa; border-radius: 999px; position: relative; overflow: hidden; }
+    .stack-list .row .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--brand-500); border-radius: 999px; }
+    .stack-list .row .pct { width: 44px; text-align: right; color: var(--ink-1); font-variant-numeric: tabular-nums; }
+
+    .overview-grid {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .overview-card {
+      height: 360px; min-width: 0; min-height: 0; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .overview-card > .card-head { flex: 0 0 auto; }
+    .overview-card > .card-body {
+      flex: 1 1 auto; min-height: 0; overflow: auto;
+      scrollbar-gutter: stable;
+    }
+
+    /* 弹窗（新增/编辑） */
+    .modal-mask { position: fixed; inset: 0; background: rgba(20,40,90,.32); z-index: 60; opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .modal-mask.show { opacity: 1; pointer-events: auto; }
+    .modal {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -46%) scale(.96);
+      width: var(--modal-width); height: var(--modal-height);
+      max-width: calc(100vw - 48px); max-height: calc(100vh - 4px);
+      background: #fff; border-radius: 12px; box-shadow: 0 20px 60px rgba(20,40,90,.25);
+      z-index: 70; opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s;
+      display: flex; flex-direction: column;
+    }
+    .modal.show { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+    .modal-head {
+      min-height: 52px; padding: 0 24px; border-bottom: 1px solid var(--line-1);
+      display: flex; align-items: center; gap: 8px;
+      flex: 0 0 52px;
+    }
+    .modal-head .title { font-weight: 600; }
+    .modal-head .close { margin-left: auto; cursor: pointer; color: var(--ink-3); }
+    .modal-body {
+      padding: 20px 24px;
+      flex: 1 1 auto; min-height: 0;
+      overflow: auto; scrollbar-gutter: stable;
+    }
+    .modal-foot {
+      min-height: 56px; padding: 0 24px; border-top: 1px solid var(--line-1);
+      display: flex; justify-content: flex-end; gap: 8px;
+      align-items: center; flex: 0 0 56px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--form-column-gap); row-gap: 0;
+      align-content: start;
+    }
+    .form-grid .full { grid-column: 1 / -1; }
+    .form-item {
+      position: relative; min-width: 0;
+      display: flex; flex-direction: column; gap: 6px;
+      padding-bottom: var(--form-row-space);
+    }
+    .form-item label { min-height: 18px; line-height: 18px; font-size: 12px; color: var(--ink-2); }
+    .form-item label .req { color: var(--red-500); margin-left: 2px; }
+    .form-item input, .form-item select, .form-item textarea {
+      width: 100%; height: 36px; min-width: 0;
+      padding: 0 10px; border: 1px solid var(--line-1); border-radius: 4px;
+      font: inherit; color: var(--ink-1); background: #fff;
+    }
+    .form-item input:disabled, .form-item select:disabled, .form-item textarea:disabled {
+      background: #f5f7fb; color: var(--ink-2); cursor: not-allowed; border-color: var(--line-2);
+    }
+    .form-item textarea { height: 72px; padding: 8px 10px; resize: none; }
+    .form-item .err {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      min-height: 16px; line-height: 16px;
+      color: var(--red-500); font-size: 12px;
+    }
+    .form-tip { color: var(--ink-3); font-size: 12px; margin-top: 4px; }
+
+    /* 工具类 */
+    .muted { color: var(--ink-3); }
+    .nowrap { white-space: nowrap; }
+    .gap-14 { display: grid; gap: 14px; }
+    .col-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+    /* 段标题 */
+    .section-title {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 600; margin-bottom: 10px;
+    }
+    .section-title .dot {
+      width: 12px; height: 12px; border-radius: 3px;
+      background: linear-gradient(135deg, #4d92ff, #1f6feb);
+    }
+
+    .alert-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--line-2); font-size: 12.5px; }
+    .alert-row:last-child { border-bottom: none; }
+    .alert-row .name { flex: 1; color: var(--ink-1); }
+    .alert-row .meta { color: var(--ink-3); font-size: 12px; }
+
+    /* 提示条 */
+    .tip {
+      background: var(--bg-tag-soft); color: var(--brand-700);
+      border: 1px solid var(--brand-100);
+      padding: 8px 12px; border-radius: 6px; font-size: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- 侧栏 -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="9" r="1.5" />
+            <path d="M12 7.5V2.5" />
+            <path d="M13.3 9.75l4.8 2.8" />
+            <path d="M10.7 9.75l-4.8 2.8" />
+            <path d="M12 10.5L10.6 21" />
+            <path d="M12 10.5L13.4 21" />
+            <path d="M9.7 21h4.6" />
+          </svg>
+        </div>
+        <div class="name">海上风电建设管理平台</div>
+      </div>
+      <div class="side-group">
+        <div class="side-item fake" aria-disabled="true" title="演示菜单">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-6h5v6"/>
+          </svg>
+          <span>数字门户</span>
+        </div>
+        <div class="side-item fake" aria-disabled="true" title="演示菜单">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h11v14H4z"/><path d="M7 8h5M7 12h3"/><circle cx="17.5" cy="17.5" r="3.5"/><path d="m20 20 2 2"/>
+          </svg>
+          <span>项目中心</span><span class="side-caret">⌄</span>
+        </div>
+        <div class="side-item fake" aria-disabled="true" title="演示菜单">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <ellipse cx="10" cy="5" rx="6" ry="2.5"/><path d="M4 5v5c0 1.4 2.7 2.5 6 2.5 1.1 0 2.1-.1 3-.4M4 10v5c0 1.4 2.7 2.5 6 2.5"/><circle cx="17" cy="17" r="4"/><path d="M17 15v4M15 17h4"/>
+          </svg>
+          <span>基础信息</span><span class="side-caret">⌄</span>
+        </div>
+        <div class="side-item fake" aria-disabled="true" title="演示菜单">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-4h12v4"/>
+          </svg>
+          <span>组织架构</span><span class="side-caret">⌄</span>
+        </div>
+        <div class="side-item fake" aria-disabled="true" title="演示菜单">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="7" r="4"/><path d="M5 21c.5-5 2.8-7 7-7s6.5 2 7 7"/>
+          </svg>
+          <span>人员管理</span><span class="side-caret">⌄</span>
+        </div>
+        <div class="side-item fake" aria-disabled="true" title="演示菜单">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4M6 8h12"/>
+          </svg>
+          <span>设备管理</span><span class="side-caret">⌄</span>
+        </div>
+        <div class="side-item fake" aria-disabled="true" title="演示菜单">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9h18v8H3zM5 9V5h14v4"/><path d="M7 13h3M14 13h3M6 17v2M18 17v2"/>
+          </svg>
+          <span>船舶管理</span><span class="side-caret">⌄</span>
+        </div>
+        <div class="side-item fake" aria-disabled="true" title="演示菜单">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/>
+          </svg>
+          <span>风场气象</span><span class="side-caret">⌄</span>
+        </div>
+        <div class="side-item fake" aria-disabled="true" title="演示菜单">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 3h14v18H5zM8 7h8M8 11h8M8 15h5"/><path d="M3 6h2M3 10h2M3 14h2M3 18h2"/>
+          </svg>
+          <span>进度管理</span><span class="side-caret">⌄</span>
+        </div>
+        <div class="side-item fake" aria-disabled="true" title="演示菜单">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="8" r="3"/><path d="M3.5 19c.4-4 2.2-6 5.5-6 1 0 1.9.2 2.6.6"/><path d="M17 12l4 1.8v3.4c0 2.4-1.7 4-4 4.8-2.3-.8-4-2.4-4-4.8v-3.4z"/><path d="m15.5 17 1 1 2-2"/>
+          </svg>
+          <span>安全管理</span><span class="side-caret">⌄</span>
+        </div>
+        <div class="side-item active">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M4 20h16M6 20V9l6-4 6 4v11M9 20v-6h6v6"/>
+          </svg>
+          <span>海上站下部基础建造进度管理</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 主体 -->
+    <section class="main">
+      <!-- 顶栏 -->
+      <header class="topbar">
+        <div class="collapse">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M3 12h18M3 18h18" />
+          </svg>
+          <span>菜单</span>
+        </div>
+        <div class="crumb">
+          <span>海上站下部基础建造进度管理</span>
+        </div>
+        <div class="right">
+          <span class="pill ok"><span class="dot"></span>在线</span>
+          <span>张三丰</span>
+          <div class="avatar">张</div>
+        </div>
+      </header>
+
+      <!-- 一级页签 -->
+      <nav class="tabs" id="tabs">
+        <div class="tab active" data-tab="overview">总览</div>
+        <div class="tab" data-tab="material">备料进度</div>
+        <div class="tab" data-tab="pile">钢管桩制作进度</div>
+        <div class="tab" data-tab="main">主体构件制作进度</div>
+        <div class="tab" data-tab="sub">附属构件制作进度</div>
+        <div class="tab" data-tab="lift">总装进度</div>
+      </nav>
+
+      <!-- 内容区 -->
+      <main class="content" id="content"></main>
+    </section>
+  </div>
+
+  <!-- 新增/编辑弹窗 -->
+  <div class="modal-mask" id="modalMask"></div>
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <div class="title" id="modalTitle">新增</div>
+      <span class="close" id="modalClose">✕</span>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot">
+      <button class="btn" id="modalCancel">取消</button>
+      <button class="btn primary" id="modalSave">保存</button>
+    </div>
+  </div>
+
+  <script>
+    // ============== 示例数据（脱敏/合成） ==============
+    const DATA = {
+      project: {
+        name: "浙江海风苍南示范项目 · 海上换流站下部基础",
+        code: "CN-ZF-CN-OS-001",
+        loc: "江苏海力风电设备科技股份有限公司 · 启东基地",
+        today: new Date().toLocaleDateString("sv-SE")
+      },
+      material: [
+        { id: 1, name: "钢管桩钢材", spec: "DH36 / 板厚 50–80mm", planQty: 7720.78, recvQty: 7720.78, planStart: "2025-12-01", planEnd: "2026-02-15", actStart: "2025-12-05", actEnd: "2026-02-10", owner: "王希洪", status: "已完成", remark: "全部到货并检验合格", updatedAt: "2026-02-10 14:22" },
+        { id: 2, name: "导管架主体钢板", spec: "DH36 / 板厚 30–60mm", planQty: 11571.77, recvQty: 11571.77, planStart: "2025-12-10", planEnd: "2026-03-10", actStart: "2025-12-12", actEnd: "2026-03-08", owner: "李恩岩", status: "已完成", remark: "—", updatedAt: "2026-03-08 17:01" },
+        { id: 3, name: "型材", spec: "球扁钢 / 角钢", planQty: 1445.82, recvQty: 1445.82, planStart: "2025-12-10", planEnd: "2026-02-20", actStart: "2025-12-15", actEnd: "2026-02-18", owner: "王希洪", status: "已完成", remark: "—", updatedAt: "2026-02-18 11:36" },
+        { id: 4, name: "浮筒钢板", spec: "DH36 / 板厚 20–40mm", planQty: 1066.575, recvQty: 1066.575, planStart: "2026-01-05", planEnd: "2026-03-25", actStart: "2026-01-10", actEnd: "2026-03-22", owner: "李恩岩", status: "已完成", remark: "—", updatedAt: "2026-03-22 09:48" }
+      ],
+      piles: [
+        { id: "Z1", code: "PILE-Z01", spec: "Φ4400×114m", planQty: 760, planStart: "2025-12-15", planEnd: "2026-04-30", actStart: "2025-12-18", actFinish: null, prog: 80, owner: "刘刚", updatedAt: "2026-07-18 09:12" },
+        { id: "Z2", code: "PILE-Z02", spec: "Φ4400×114m", planQty: 760, planStart: "2025-12-15", planEnd: "2026-05-05", actStart: "2025-12-20", actFinish: null, prog: 80, owner: "刘刚", updatedAt: "2026-07-18 09:12" },
+        { id: "Z3", code: "PILE-Z03", spec: "Φ4400×114m", planQty: 760, planStart: "2025-12-20", planEnd: "2026-05-10", actStart: "2025-12-22", actFinish: null, prog: 80, owner: "胡顺雪", updatedAt: "2026-07-18 09:14" },
+        { id: "Z4", code: "PILE-Z04", spec: "Φ4400×114m", planQty: 760, planStart: "2026-01-05", planEnd: "2026-05-15", actStart: "2026-01-08", actFinish: null, prog: 75, owner: "胡顺雪", updatedAt: "2026-07-18 09:14" },
+        { id: "Z5", code: "PILE-Z05", spec: "Φ4400×114m", planQty: 760, planStart: "2026-01-10", planEnd: "2026-05-25", actStart: "2026-01-12", actFinish: null, prog: 75, owner: "刘刚", updatedAt: "2026-07-17 18:33" },
+        { id: "Z6", code: "PILE-Z06", spec: "Φ4400×114m", planQty: 760, planStart: "2026-01-15", planEnd: "2026-06-05", actStart: "2026-01-18", actFinish: null, prog: 71, owner: "胡顺雪", updatedAt: "2026-07-17 18:34" },
+        { id: "Z7", code: "PILE-Z07", spec: "Φ4400×114m", planQty: 760, planStart: "2026-01-25", planEnd: "2026-06-20", actStart: "2026-01-28", actFinish: null, prog: 61, owner: "刘刚", updatedAt: "2026-07-17 18:35" },
+        { id: "Z8", code: "PILE-Z08", spec: "Φ4400×114m", planQty: 760, planStart: "2026-02-01", planEnd: "2026-06-30", actStart: "2026-02-05", actFinish: null, prog: 60, owner: "胡顺雪", updatedAt: "2026-07-17 18:36" },
+        { id: "Z9", code: "PILE-Z09", spec: "Φ4400×114m", planQty: 760, planStart: "2026-02-10", planEnd: "2026-07-10", actStart: "2026-02-12", actFinish: null, prog: 42, owner: "刘刚", updatedAt: "2026-07-15 11:01" },
+        { id: "Z10", code: "PILE-Z10", spec: "Φ4400×114m", planQty: 760, planStart: "2026-02-15", planEnd: "2026-07-25", actStart: "2026-02-18", actFinish: null, prog: 36, owner: "胡顺雪", updatedAt: "2026-07-15 11:02" }
+      ],
+      mains: [
+        { id: 1, code: "MAIN-2-D-MP", name: "2轴下主片",   struct: "2轴", qty: 1450, planStart: "2025-12-20", planEnd: "2026-03-25", actStart: "2025-12-22", actFinish: "2026-03-20", prog: 100, owner: "陈兴咪", remark: "已转入合拢", updatedAt: "2026-03-20 16:00" },
+        { id: 2, code: "MAIN-6-D-MP", name: "6轴下主片",   struct: "6轴", qty: 1450, planStart: "2025-12-22", planEnd: "2026-04-05", actStart: "2025-12-25", actFinish: "2026-04-01", prog: 100, owner: "陈兴咪", remark: "—", updatedAt: "2026-04-01 17:11" },
+        { id: 3, code: "MAIN-2-U-MP", name: "2轴上主片",   struct: "2轴", qty: 1100, planStart: "2026-01-15", planEnd: "2026-04-25", actStart: "2026-01-20", actFinish: "2026-04-20", prog: 100, owner: "陈兴咪", remark: "—", updatedAt: "2026-04-20 16:42" },
+        { id: 4, code: "MAIN-6-U-MP", name: "6轴上主片",   struct: "6轴", qty: 1100, planStart: "2026-01-20", planEnd: "2026-05-05", actStart: "2026-01-25", actFinish: "2026-04-30", prog: 100, owner: "陈兴咪", remark: "—", updatedAt: "2026-04-30 17:00" },
+        { id: 5, code: "MAIN-2-D-XP", name: "2轴下X片",   struct: "2轴", qty: 320,  planStart: "2026-02-10", planEnd: "2026-04-10", actStart: "2026-02-12", actFinish: "2026-04-08", prog: 100, owner: "孙炳生", remark: "—", updatedAt: "2026-04-08 16:00" },
+        { id: 6, code: "MAIN-6-D-XP", name: "6轴下X片",   struct: "6轴", qty: 320,  planStart: "2026-02-15", planEnd: "2026-04-15", actStart: "2026-02-18", actFinish: "2026-04-12", prog: 100, owner: "孙炳生", remark: "—", updatedAt: "2026-04-12 16:00" },
+        { id: 7, code: "MAIN-2-U-XP", name: "2轴上X片",   struct: "2轴", qty: 280,  planStart: "2026-02-25", planEnd: "2026-04-25", actStart: "2026-02-28", actFinish: "2026-04-22", prog: 100, owner: "孙炳生", remark: "—", updatedAt: "2026-04-22 16:00" },
+        { id: 8, code: "MAIN-6-U-XP", name: "6轴上X片",   struct: "6轴", qty: 280,  planStart: "2026-03-01", planEnd: "2026-04-30", actStart: "2026-03-05", actFinish: "2026-04-28", prog: 100, owner: "孙炳生", remark: "—", updatedAt: "2026-04-28 16:00" },
+        { id: 9, code: "MAIN-A-MS",    name: "A轴米字撑", struct: "A轴", qty: 120,  planStart: "2026-03-10", planEnd: "2026-05-05", actStart: "2026-03-12", actFinish: "2026-05-02", prog: 100, owner: "孙炳生", remark: "—", updatedAt: "2026-05-02 16:00" },
+        { id: 10, code: "MAIN-C-MS",   name: "C轴米字撑", struct: "C轴", qty: 120,  planStart: "2026-03-12", planEnd: "2026-05-08", actStart: "2026-03-15", actFinish: "2026-05-06", prog: 100, owner: "孙炳生", remark: "—", updatedAt: "2026-05-06 16:00" },
+        { id: 11, code: "MAIN-E-MS",   name: "E轴米字撑", struct: "E轴", qty: 120,  planStart: "2026-03-15", planEnd: "2026-05-12", actStart: "2026-03-18", actFinish: "2026-05-10", prog: 100, owner: "孙炳生", remark: "—", updatedAt: "2026-05-10 16:00" },
+        { id: 12, code: "MAIN-E-OS",   name: "E轴主立柱组件", struct: "E轴", qty: 220, planStart: "2026-03-25", planEnd: "2026-05-25", actStart: "2026-03-28", actFinish: null, prog: 92, owner: "陈兴咪", remark: "组对完成，进入焊接", updatedAt: "2026-07-12 10:22" }
+      ],
+      subs: [
+        { id: 1, code: "SUB-SHO-001", name: "桩靴",       cls: "结构附属", qty: 240, planStart: "2026-02-01", planEnd: "2026-04-10", actStart: "2026-02-05", actFinish: "2026-04-05", prog: 100, hot: false, owner: "李恩岩", remark: "已合拢", updatedAt: "2026-04-05 15:20" },
+        { id: 2, code: "SUB-SUN-001", name: "防沉平台",   cls: "结构附属", qty: 180, planStart: "2026-02-10", planEnd: "2026-04-20", actStart: "2026-02-12", actFinish: "2026-04-18", prog: 100, hot: false, owner: "李恩岩", remark: "—", updatedAt: "2026-04-18 16:00" },
+        { id: 3, code: "SUB-BUF-001", name: "靠泊防撞件", cls: "安全靠泊", qty: 60,  planStart: "2026-03-15", planEnd: "2026-06-10", actStart: "2026-03-20", actFinish: null, prog: 78, hot: false, owner: "王希洪", remark: "总段装配中", updatedAt: "2026-07-12 11:00" },
+        { id: 4, code: "SUB-CBP-001", name: "海缆保护管", cls: "结构附属", qty: 35,  planStart: "2026-03-20", planEnd: "2026-06-20", actStart: "2026-03-25", actFinish: null, prog: 65, hot: false, owner: "李恩岩", remark: "下料完成", updatedAt: "2026-07-10 09:30" },
+        { id: 5, code: "SUB-PON-001", name: "浮筒",       cls: "装船临时", qty: 1290, planStart: "2026-02-20", planEnd: "2026-07-30", actStart: "2026-02-25", actFinish: null, prog: 30, hot: true, owner: "陈兴咪", remark: "下料/拼板/卷圆进行中", updatedAt: "2026-07-20 16:48" }
+      ],
+      lifts: [
+        { id: 1, code: "LIFT-LOW-001", name: "6轴AC下主片体", dur: 8, planStart: "2026-04-20", planEnd: "2026-04-28", actStart: "2026-04-22", actFinish: "2026-04-28", prog: 100, res: "1000t龙门吊", org: "海力", owner: "陈兴咪", remark: "—", updatedAt: "2026-04-28 16:00" },
+        { id: 2, code: "LIFT-LOW-002", name: "2轴AC下主片体", dur: 8, planStart: "2026-04-28", planEnd: "2026-05-06", actStart: "2026-05-01", actFinish: "2026-05-06", prog: 100, res: "1000t龙门吊", org: "海力", owner: "陈兴咪", remark: "—", updatedAt: "2026-05-06 16:00" },
+        { id: 3, code: "LIFT-LOW-003", name: "6轴CE下主片体", dur: 8, planStart: "2026-05-06", planEnd: "2026-05-14", actStart: "2026-05-08", actFinish: "2026-05-14", prog: 100, res: "1000t龙门吊", org: "海力", owner: "陈兴咪", remark: "—", updatedAt: "2026-05-14 16:00" },
+        { id: 4, code: "LIFT-LOW-004", name: "A/C/E轴米字撑", dur: 6, planStart: "2026-05-14", planEnd: "2026-05-20", actStart: "2026-05-16", actFinish: "2026-05-20", prog: 100, res: "1000t龙门吊", org: "海力", owner: "陈兴咪", remark: "—", updatedAt: "2026-05-20 16:00" },
+        { id: 5, code: "LIFT-LOW-005", name: "B/D轴K字撑",   dur: 5, planStart: "2026-05-20", planEnd: "2026-05-25", actStart: "2026-05-22", actFinish: "2026-05-25", prog: 100, res: "1000t龙门吊", org: "海力", owner: "陈兴咪", remark: "—", updatedAt: "2026-05-25 16:00" },
+        { id: 6, code: "LIFT-AUX-001", name: "桩靴吊装",     dur: 4, planStart: "2026-05-25", planEnd: "2026-05-29", actStart: "2026-05-27", actFinish: "2026-05-29", prog: 100, res: "3600t龙门吊", org: "海力", owner: "陈兴咪", remark: "—", updatedAt: "2026-05-29 16:00" },
+        { id: 7, code: "LIFT-AUX-002", name: "水平横撑",     dur: 5, planStart: "2026-05-29", planEnd: "2026-06-04", actStart: "2026-06-01", actFinish: "2026-06-04", prog: 100, res: "1000t龙门吊", org: "海力", owner: "陈兴咪", remark: "—", updatedAt: "2026-06-04 16:00" },
+        { id: 8, code: "LIFT-AUX-003", name: "电缆管",       dur: 3, planStart: "2026-06-04", planEnd: "2026-06-07", actStart: "2026-06-05", actFinish: "2026-06-07", prog: 100, res: "—", org: "海力", owner: "陈兴咪", remark: "—", updatedAt: "2026-06-07 16:00" },
+        { id: 9, code: "LIFT-LOW-006", name: "上主片体",     dur: 8, planStart: "2026-06-07", planEnd: "2026-06-16", actStart: "2026-06-10", actFinish: null, prog: 78, res: "3600t龙门吊", org: "海力", owner: "陈兴咪", remark: "上主片体就位中", updatedAt: "2026-07-19 10:10" },
+        { id: 10, code: "LIFT-LOW-007", name: "上主立柱",     dur: 6, planStart: "2026-06-16", planEnd: "2026-06-22", actStart: "2026-06-19", actFinish: null, prog: 55, res: "1000t龙门吊", org: "海力", owner: "陈兴咪", remark: "E轴立柱已立", updatedAt: "2026-07-19 10:12" },
+        { id: 11, code: "LIFT-PON-001", name: "浮筒吊装",     dur: 3, planStart: "2026-06-22", planEnd: "2026-06-25", actStart: null, actFinish: null, prog: 0, res: "3600t龙门吊", org: "海力", owner: "陈兴咪", remark: "前置：浮筒进度", updatedAt: "2026-07-10 09:00" },
+        { id: 12, code: "LIFT-AUX-004", name: "注水系统安装", dur: 5, planStart: "2026-06-25", planEnd: "2026-07-01", actStart: null, actFinish: null, prog: 0, res: "—", org: "海力", owner: "陈兴咪", remark: "图纸滞后", updatedAt: "2026-07-08 14:00" },
+        { id: 13, code: "LIFT-PON-002", name: "浮筒焊接",     dur: 10, planStart: "2026-07-01", planEnd: "2026-07-12", actStart: null, actFinish: null, prog: 0, res: "—", org: "海力", owner: "陈兴咪", remark: "前置：浮筒吊装", updatedAt: "2026-07-08 14:00" },
+        { id: 14, code: "LIFT-LDS-001", name: "整体补涂",     dur: 6, planStart: "2026-07-12", planEnd: "2026-07-19", actStart: null, actFinish: null, prog: 0, res: "—", org: "海力", owner: "陈兴咪", remark: "—", updatedAt: "2026-07-08 14:00" }
+      ]
+    };
+
+    // ============== 工具 ==============
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+    const LIST_STATE = {
+      material: { page: 1, pageSize: 20, filters: {} },
+      pile: { page: 1, pageSize: 20, filters: {} },
+      main: { page: 1, pageSize: 20, filters: {} },
+      sub: { page: 1, pageSize: 20, filters: {} },
+      lift: { page: 1, pageSize: 20, filters: {} }
+    };
+
+    function formatNow() {
+      const now = new Date();
+      const pad = value => String(value).padStart(2, "0");
+      return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    }
+    function nextNumericId(items) {
+      return items.reduce((max, item) => Math.max(max, Number(item.id) || 0), 0) + 1;
+    }
+    function average(values) {
+      return values.length ? Math.round(values.reduce((sum, value) => sum + Number(value || 0), 0) / values.length) : 0;
+    }
+    function materialProgress(item) {
+      if (!(Number(item.planQty) > 0)) return 0;
+      const received = Math.max(0, Number(item.recvQty) || 0);
+      if (received >= Number(item.planQty)) return 100;
+      return Math.max(0, Math.min(99, Math.round((received / Number(item.planQty)) * 100)));
+    }
+    function dashboardMetrics() {
+      const materialAvg = average(DATA.material.map(materialProgress));
+      const pileAvg = average(DATA.piles.map(item => item.prog));
+      const mainAvg = average(DATA.mains.map(item => item.prog));
+      const subAvg = average(DATA.subs.map(item => item.prog));
+      const liftRate = average(DATA.lifts.map(item => item.prog));
+      const overall = average([materialAvg, pileAvg, mainAvg, subAvg, liftRate]);
+      const recentUpdates = collectRecentUpdates(7);
+      return { overall, pileAvg, mainAvg, subAvg, liftRate, recentUpdates };
+    }
+    function collectRecentUpdates(days) {
+      const rangeEnd = new Date(`${DATA.project.today}T23:59:59`);
+      const rangeStart = new Date(`${DATA.project.today}T00:00:00`);
+      rangeStart.setDate(rangeStart.getDate() - (days - 1));
+      const groups = [
+        [DATA.material, "备料", item => item.name],
+        [DATA.piles, "钢管桩", item => item.id],
+        [DATA.mains, "主体构件", item => item.name],
+        [DATA.subs, "附属构件", item => item.name],
+        [DATA.lifts, "总装任务", item => item.name]
+      ];
+      return groups.flatMap(([items, type, getName]) => items.map(item => ({
+        type, name: getName(item), owner: item.owner || "—", updatedAt: item.updatedAt || ""
+      }))).filter(item => {
+        const updatedTime = new Date(item.updatedAt.replace(" ", "T"));
+        return !Number.isNaN(updatedTime.getTime()) && updatedTime >= rangeStart && updatedTime <= rangeEnd;
+      })
+        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    }
+
+    function barHTML(p, color="") {
+      const fill = `style="width:${p}%"`;
+      return `<div class="bar">
+        <div class="track"><div class="fill ${color}" ${fill}></div></div>
+        <div class="num">${p}%</div>
+      </div>`;
+    }
+    function statusOf(p) {
+      if (p === 0) return `<span class="status gray">未开始</span>`;
+      if (p === 100) return `<span class="status green">已完成</span>`;
+      return `<span class="status blue">进行中</span>`;
+    }
+    function statusText(p) {
+      if (Number(p) === 0) return "未开始";
+      if (Number(p) === 100) return "已完成";
+      return "进行中";
+    }
+    function fmtDate(d) { return d || "—"; }
+    function selected(value, expected) { return value === expected ? "selected" : ""; }
+    function includesText(value, keyword) {
+      return !keyword || String(value || "").toLowerCase().includes(String(keyword).toLowerCase());
+    }
+    function queryList(page) {
+      const filters = {};
+      $$("#content [data-filter]").forEach(control => { filters[control.dataset.filter] = control.value.trim(); });
+      LIST_STATE[page].filters = filters;
+      LIST_STATE[page].page = 1;
+      render();
+    }
+    function resetList(page) {
+      LIST_STATE[page].filters = {};
+      LIST_STATE[page].page = 1;
+      render();
+    }
+    function setPageSize(page, value) {
+      LIST_STATE[page].pageSize = Number(value);
+      LIST_STATE[page].page = 1;
+      render();
+    }
+    function changePage(page, delta) {
+      LIST_STATE[page].page += Number(delta);
+      render();
+    }
+    function paginate(page, items) {
+      const state = LIST_STATE[page];
+      const totalPages = Math.max(1, Math.ceil(items.length / state.pageSize));
+      state.page = Math.max(1, Math.min(state.page, totalPages));
+      const start = (state.page - 1) * state.pageSize;
+      return { rows: items.slice(start, start + state.pageSize), total: items.length, totalPages, start };
+    }
+    function pagerHTML(page, total, totalPages) {
+      const state = LIST_STATE[page];
+      return `<div class="pager">
+        <span>共 ${total} 条</span>
+        <select class="ctl short" aria-label="每页条数" onchange="setPageSize('${page}', this.value)" style="height:26px;min-width:auto">
+          ${[10, 20, 50].map(size => `<option value="${size}" ${size===state.pageSize?'selected':''}>${size}条/页</option>`).join("")}
+        </select>
+        <div class="right">
+          <button class="page" type="button" aria-label="上一页" onclick="changePage('${page}', -1)" ${state.page<=1?'disabled':''}>‹</button>
+          <span class="page cur">${state.page} / ${totalPages}</span>
+          <button class="page" type="button" aria-label="下一页" onclick="changePage('${page}', 1)" ${state.page>=totalPages?'disabled':''}>›</button>
+        </div>
+      </div>`;
+    }
+    function emptyRow(colspan) {
+      return `<tr><td class="empty-cell" colspan="${colspan}">暂无符合条件的数据</td></tr>`;
+    }
+    function deleteListItem(page, id) {
+      const config = {
+        material: { key: "material", label: "备料", name: item => item.name },
+        pile: { key: "piles", label: "钢管桩", name: item => item.id },
+        main: { key: "mains", label: "主体构件", name: item => item.name },
+        sub: { key: "subs", label: "附属构件", name: item => item.name },
+        lift: { key: "lifts", label: "总装任务", name: item => item.name }
+      }[page];
+      const list = DATA[config.key];
+      const item = list.find(row => String(row.id) === String(id));
+      if (!item) return;
+      if (!confirm(`确认删除${config.label}「${config.name(item)}」？刷新页面可恢复演示数据。`)) return;
+      DATA[config.key] = list.filter(row => String(row.id) !== String(id));
+      render();
+    }
+
+    // ============== 各页签渲染 ==============
+    function renderOverview() {
+      const { overall, pileAvg, mainAvg, subAvg, liftRate, recentUpdates } = dashboardMetrics();
+      const kpis = `
+        <div class="kpis">
+          <div class="kpi"><div class="ico">⚙️</div><div><div class="label">项目整体完成率</div><div class="val">${overall}<span style="font-size:13px">%</span></div></div></div>
+          <div class="kpi"><div class="ico">🔩</div><div><div class="label">钢管桩整体进度</div><div class="val">${pileAvg}<span style="font-size:13px">%</span></div></div></div>
+          <div class="kpi"><div class="ico">🏗️</div><div><div class="label">主体构件整体进度</div><div class="val">${mainAvg}<span style="font-size:13px">%</span></div></div></div>
+          <div class="kpi"><div class="ico">🛟</div><div><div class="label">附属构件整体进度</div><div class="val">${subAvg}<span style="font-size:13px">%</span></div></div></div>
+          <div class="kpi"><div class="ico">🔗</div><div><div class="label">总装进度</div><div class="val">${liftRate}<span style="font-size:13px">%</span></div></div></div>
+          <div class="kpi"><div class="ico">✏️</div><div><div class="label">最近更新数据</div><div class="val">${recentUpdates.length}</div></div></div>
+        </div>
+      `;
+
+      // 列表摘要直接取当前内存数据，和明细页保持一致。
+      const pileRows = DATA.piles.map(p => `
+        <div class="row">
+          <div class="label">${p.id}</div>
+          <div class="track"><div class="fill" style="width:${p.prog}%"></div></div>
+          <div class="pct">${p.prog}%</div>
+        </div>
+      `).join("");
+
+      const subRows = DATA.subs.map(s => `
+        <div class="row">
+          <div class="label">${s.name}</div>
+          <div class="track"><div class="fill" style="width:${s.prog}%"></div></div>
+          <div class="pct">${s.prog}%</div>
+        </div>
+      `).join("");
+
+      const activeLifts = DATA.lifts.filter(item => item.prog < 100);
+      const liftList = (activeLifts.length ? activeLifts : DATA.lifts).slice(0, 8).map(l => {
+        return `<div class="alert-row">
+          <span class="name">${l.id}. ${l.name}</span>
+          <span>${statusOf(l.prog).replace(/<[^>]+>/g,'')}</span>
+          <span class="meta">${l.prog}%</span>
+        </div>`;
+      }).join("");
+
+      return `
+        ${kpis}
+        <div style="height:14px"></div>
+        <div class="overview-grid">
+          <div class="card overview-card">
+            <div class="card-head">
+              <div class="card-title"><span class="dot"></span>最近更新数据</div>
+              <div class="card-actions">
+                <span class="muted">近7天</span>
+              </div>
+            </div>
+            <div class="card-body">${recentUpdates.length ? recentUpdates.map(item => `
+              <div class="alert-row"><span class="name">${item.name} · ${item.type}</span><span class="status blue">已更新</span><span class="meta">${item.owner} · ${item.updatedAt.slice(5, 16)}</span></div>
+            `).join("") : '<div class="muted">最近7天暂无更新数据</div>'}</div>
+          </div>
+
+          <div class="card overview-card">
+            <div class="card-head">
+              <div class="card-title"><span class="dot"></span>钢管桩制作进度</div>
+              <div class="card-actions">
+                <a href="#" onclick="event.preventDefault();goto('pile')">查看详情 →</a>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="stack-list">${pileRows}</div>
+            </div>
+          </div>
+
+          <div class="card overview-card">
+            <div class="card-head">
+              <div class="card-title"><span class="dot"></span>附属构件制作进度</div>
+              <div class="card-actions">
+                <a href="#" onclick="event.preventDefault();goto('sub')">查看详情 →</a>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="stack-list">${subRows}</div>
+            </div>
+          </div>
+
+          <div class="card overview-card">
+            <div class="card-head">
+              <div class="card-title"><span class="dot"></span>总装近况</div>
+              <div class="card-actions">
+                <a href="#" onclick="event.preventDefault();goto('lift')">查看详情 →</a>
+              </div>
+            </div>
+            <div class="card-body">${liftList}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMaterial() {
+      const f = LIST_STATE.material.filters;
+      const filtered = DATA.material.filter(item =>
+        includesText(item.name, f.name) && includesText(item.spec, f.spec) &&
+        (!f.status || statusText(materialProgress(item)) === f.status) && (!f.owner || item.owner === f.owner)
+      );
+      const pageData = paginate("material", filtered);
+      const rows = pageData.rows.map(m => {
+        const prog = materialProgress(m);
+        return `<tr data-id="${m.id}">
+          <td>${m.id}</td>
+          <td><a href="#" onclick="event.preventDefault();viewMaterial(${m.id})">${m.name}</a></td>
+          <td>${m.spec}</td>
+          <td class="num">${m.planQty.toFixed(2)}</td>
+          <td class="num">${m.recvQty.toFixed(2)}</td>
+          <td>${barHTML(prog, prog===100?'green':'')}</td>
+          <td>${m.planStart}</td>
+          <td>${m.planEnd}</td>
+          <td>${fmtDate(m.actStart)}</td>
+          <td>${fmtDate(m.actEnd)}</td>
+          <td>${statusOf(prog)}</td>
+          <td>${m.owner}</td>
+          <td>${m.remark || '—'}</td>
+          <td>${m.updatedAt || '—'}</td>
+          <td class="ctr"><span class="op-group"><a href="#" onclick="event.preventDefault();viewMaterial(${m.id})">查看</a><a href="#" onclick="event.preventDefault();openMaterialForm(${m.id})">编辑</a><a class="danger" href="#" onclick="event.preventDefault();deleteListItem('material', ${m.id})">删除</a></span></td>
+        </tr>`;
+      }).join("");
+
+      return `
+        <div class="card list-card">
+          <div class="filters">
+            <div class="field"><label>材料名称</label><input class="ctl" data-filter="name" value="${f.name || ''}" placeholder="请输入"/></div>
+            <div class="field"><label>规格</label><input class="ctl short" data-filter="spec" value="${f.spec || ''}" placeholder="请输入"/></div>
+            <div class="field"><label>状态</label><select class="ctl short" data-filter="status"><option value="">请选择</option><option ${selected(f.status,'未开始')}>未开始</option><option ${selected(f.status,'进行中')}>进行中</option><option ${selected(f.status,'已完成')}>已完成</option></select></div>
+            <div class="field"><label>责任人</label><select class="ctl short" data-filter="owner"><option value="">请选择</option><option ${selected(f.owner,'王希洪')}>王希洪</option><option ${selected(f.owner,'李恩岩')}>李恩岩</option><option ${selected(f.owner,'陈兴咪')}>陈兴咪</option></select></div>
+            <div style="margin-left:auto;display:flex;gap:8px">
+              <button class="btn primary" onclick="queryList('material')">查询</button>
+              <button class="btn" onclick="resetList('material')">重置</button>
+            </div>
+          </div>
+          <div class="card-head">
+            <div class="card-title"><span class="dot"></span>备料进度</div>
+            <div class="card-actions">
+              <button class="btn primary" onclick="openMaterialForm()"><span class="plus">＋</span>新增</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+              <table class="t">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>材料名称</th>
+                  <th>规格</th>
+                  <th class="num">计划量(t)</th>
+                  <th class="num">已到货量(t)</th>
+                  <th>备料进度</th>
+                  <th>计划开始到货</th>
+                  <th>计划完成到货</th>
+                  <th>实际首日到货</th>
+                  <th>实际末日到货</th>
+                  <th>状态</th>
+                  <th>责任人</th>
+                  <th>备注</th>
+                  <th>最后更新</th>
+                  <th class="ctr">操作</th>
+                </tr>
+              </thead>
+              <tbody>${rows || emptyRow(15)}</tbody>
+            </table>
+          </div>
+          ${pagerHTML('material', pageData.total, pageData.totalPages)}
+        </div>
+      `;
+    }
+
+    function renderPiles() {
+      const f = LIST_STATE.pile.filters;
+      const filtered = DATA.piles.filter(item =>
+        includesText(item.id, f.id) && (!f.status || statusText(item.prog) === f.status) && (!f.owner || item.owner === f.owner)
+      );
+      const pageData = paginate("pile", filtered);
+      const rows = pageData.rows.map((p, i) => {
+        const color = p.prog >= 75 ? "green" : (p.prog >= 50 ? "" : "amber");
+        return `<tr data-id="${p.id}">
+          <td>${pageData.start + i + 1}</td>
+          <td><a href="#" onclick="event.preventDefault();viewPile('${p.id}')">${p.id}</a></td>
+          <td>${p.spec}</td>
+          <td>${p.planStart}</td>
+          <td>${p.planEnd}</td>
+          <td>${fmtDate(p.actStart)}</td>
+          <td>${fmtDate(p.actFinish)}</td>
+          <td>${barHTML(p.prog, color)}</td>
+          <td>${statusOf(p.prog)}</td>
+          <td>${p.owner}</td>
+          <td>${p.updatedAt}</td>
+          <td class="ctr"><span class="op-group"><a href="#" onclick="event.preventDefault();viewPile('${p.id}')">查看</a><a href="#" onclick="event.preventDefault();openPileForm('${p.id}')">编辑</a><a class="danger" href="#" onclick="event.preventDefault();deleteListItem('pile', '${p.id}')">删除</a></span></td>
+        </tr>`;
+      }).join("");
+
+      return `
+        <div class="card list-card">
+          <div class="filters">
+            <div class="field"><label>桩号</label><input class="ctl short" data-filter="id" value="${f.id || ''}" placeholder="请输入桩号"/></div>
+            <div class="field"><label>状态</label><select class="ctl short" data-filter="status"><option value="">请选择</option><option ${selected(f.status,'未开始')}>未开始</option><option ${selected(f.status,'进行中')}>进行中</option><option ${selected(f.status,'已完成')}>已完成</option></select></div>
+            <div class="field"><label>责任人</label><select class="ctl short" data-filter="owner"><option value="">请选择</option><option ${selected(f.owner,'刘刚')}>刘刚</option><option ${selected(f.owner,'胡顺雪')}>胡顺雪</option></select></div>
+            <div style="margin-left:auto;display:flex;gap:8px">
+              <button class="btn primary" onclick="queryList('pile')">查询</button>
+              <button class="btn" onclick="resetList('pile')">重置</button>
+            </div>
+          </div>
+          <div class="card-head">
+            <div class="card-title"><span class="dot"></span>钢管桩制作进度（${DATA.piles.length} 根）</div>
+            <div class="card-actions">
+              <button class="btn primary" onclick="openPileForm()"><span class="plus">＋</span>新增</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+              <table class="t">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>编号</th><th>规格</th>
+                    <th>计划开始</th><th>计划完成</th>
+                    <th>实际开始</th><th>实际完成</th>
+                    <th>制作进度</th><th>状态</th><th>责任人</th>
+                    <th>最后更新</th><th class="ctr">操作</th>
+                  </tr>
+                </thead>
+                <tbody>${rows || emptyRow(12)}</tbody>
+              </table>
+          </div>
+          ${pagerHTML('pile', pageData.total, pageData.totalPages)}
+        </div>
+      `;
+    }
+
+    function renderMains() {
+      const f = LIST_STATE.main.filters;
+      const filtered = DATA.mains.filter(item =>
+        includesText(item.name, f.name) && (!f.struct || item.struct === f.struct) &&
+        (!f.status || statusText(item.prog) === f.status) && includesText(item.owner, f.owner)
+      );
+      const pageData = paginate("main", filtered);
+      const rows = pageData.rows.map(m => {
+        return `<tr>
+          <td>${m.id}</td>
+          <td><a href="#" onclick="event.preventDefault();viewMain(${m.id})">${m.name}</a></td>
+          <td>${m.struct}</td>
+          <td>${m.planStart}</td>
+          <td>${m.planEnd}</td>
+          <td>${fmtDate(m.actStart)}</td>
+          <td>${fmtDate(m.actFinish)}</td>
+          <td>${barHTML(m.prog, m.prog===100?'green':'')}</td>
+          <td>${statusOf(m.prog)}</td>
+          <td>${m.owner}</td>
+          <td>${m.remark || '—'}</td>
+          <td>${m.updatedAt || '—'}</td>
+          <td class="ctr"><span class="op-group"><a href="#" onclick="event.preventDefault();viewMain(${m.id})">查看</a><a href="#" onclick="event.preventDefault();openMainForm(${m.id})">编辑</a><a class="danger" href="#" onclick="event.preventDefault();deleteListItem('main', ${m.id})">删除</a></span></td>
+        </tr>`;
+      }).join("");
+
+      return `
+        <div class="card list-card">
+          <div class="filters">
+            <div class="field"><label>构件名称</label><input class="ctl" data-filter="name" value="${f.name || ''}" placeholder="如 2轴下主片"/></div>
+            <div class="field"><label>所属结构</label><select class="ctl short" data-filter="struct"><option value="">请选择</option>${['2轴','6轴','A轴','C轴','E轴'].map(value=>`<option ${selected(f.struct,value)}>${value}</option>`).join('')}</select></div>
+            <div class="field"><label>状态</label><select class="ctl short" data-filter="status"><option value="">请选择</option><option ${selected(f.status,'未开始')}>未开始</option><option ${selected(f.status,'进行中')}>进行中</option><option ${selected(f.status,'已完成')}>已完成</option></select></div>
+            <div class="field"><label>责任人</label><select class="ctl short" data-filter="owner"><option value="">请选择</option><option ${selected(f.owner,'陈兴咪')}>陈兴咪</option><option ${selected(f.owner,'孙炳生')}>孙炳生</option></select></div>
+            <div style="margin-left:auto;display:flex;gap:8px">
+              <button class="btn primary" onclick="queryList('main')">查询</button>
+              <button class="btn" onclick="resetList('main')">重置</button>
+            </div>
+          </div>
+          <div class="card-head">
+            <div class="card-title"><span class="dot"></span>主体构件制作进度</div>
+            <div class="card-actions">
+              <button class="btn primary" onclick="openMainForm()"><span class="plus">＋</span>新增</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="t">
+              <thead>
+                <tr>
+                  <th>#</th><th>构件名称</th><th>所属结构</th>
+                  <th>计划开始</th><th>计划完成</th>
+                  <th>实际开始</th><th>实际完成</th>
+                  <th>制作进度</th><th>状态</th><th>责任人</th>
+                  <th>备注</th><th>最后更新</th>
+                  <th class="ctr">操作</th>
+                </tr>
+              </thead>
+              <tbody>${rows || emptyRow(13)}</tbody>
+            </table>
+          </div>
+          ${pagerHTML('main', pageData.total, pageData.totalPages)}
+        </div>
+      `;
+    }
+
+    function renderSubs() {
+      const f = LIST_STATE.sub.filters;
+      const filtered = DATA.subs.filter(item =>
+        includesText(item.name, f.name) && (!f.status || statusText(item.prog) === f.status) && (!f.owner || item.owner === f.owner)
+      );
+      const pageData = paginate("sub", filtered);
+      const rows = pageData.rows.map(s => {
+        const hot = s.hot ? `<span class="star" title="重点关注">★</span>` : "";
+        return `<tr>
+          <td>${s.id}</td>
+          <td><a href="#" onclick="event.preventDefault();viewSub(${s.id})">${s.name}</a> ${hot}</td>
+          <td>${s.planStart}</td>
+          <td>${s.planEnd}</td>
+          <td>${fmtDate(s.actStart)}</td>
+          <td>${fmtDate(s.actFinish)}</td>
+          <td>${barHTML(s.prog, s.prog===100?'green':(s.prog<40?'amber':''))}</td>
+          <td>${statusOf(s.prog)}</td>
+          <td>${s.owner}</td>
+          <td>${s.remark || '—'}</td>
+          <td>${s.updatedAt}</td>
+          <td class="ctr"><span class="op-group"><a href="#" onclick="event.preventDefault();viewSub(${s.id})">查看</a><a href="#" onclick="event.preventDefault();openSubForm(${s.id})">编辑</a><a class="danger" href="#" onclick="event.preventDefault();deleteListItem('sub', ${s.id})">删除</a></span></td>
+        </tr>`;
+      }).join("");
+
+      return `
+        <div class="card list-card">
+          <div class="filters">
+            <div class="field"><label>构件名称</label><input class="ctl" data-filter="name" value="${f.name || ''}" placeholder="请输入构件名称"/></div>
+            <div class="field"><label>状态</label><select class="ctl short" data-filter="status"><option value="">请选择</option><option ${selected(f.status,'未开始')}>未开始</option><option ${selected(f.status,'进行中')}>进行中</option><option ${selected(f.status,'已完成')}>已完成</option></select></div>
+            <div class="field"><label>责任人</label><select class="ctl short" data-filter="owner"><option value="">请选择</option><option ${selected(f.owner,'陈兴咪')}>陈兴咪</option><option ${selected(f.owner,'李恩岩')}>李恩岩</option><option ${selected(f.owner,'王希洪')}>王希洪</option></select></div>
+            <div style="margin-left:auto;display:flex;gap:8px">
+              <button class="btn primary" onclick="queryList('sub')">查询</button>
+              <button class="btn" onclick="resetList('sub')">重置</button>
+            </div>
+          </div>
+          <div class="card-head">
+            <div class="card-title"><span class="dot"></span>附属构件制作进度</div>
+            <div class="card-actions">
+              <button class="btn primary" onclick="openSubForm()"><span class="plus">＋</span>新增</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="t">
+              <thead>
+                <tr>
+                  <th>#</th><th>构件名称</th><th>计划开始</th><th>计划完成</th>
+                  <th>实际开始</th><th>实际完成</th>
+                  <th>制作进度</th><th>状态</th><th>责任人</th>
+                  <th>备注</th><th>最后更新</th><th class="ctr">操作</th>
+                </tr>
+              </thead>
+              <tbody>${rows || emptyRow(12)}</tbody>
+            </table>
+          </div>
+          ${pagerHTML('sub', pageData.total, pageData.totalPages)}
+        </div>
+      `;
+    }
+
+    function renderLifts() {
+      const f = LIST_STATE.lift.filters;
+      const filtered = DATA.lifts.filter(item =>
+        includesText(item.name, f.name) && includesText(item.res, f.res) &&
+        (!f.status || statusText(item.prog) === f.status) && includesText(item.owner, f.owner)
+      );
+      const pageData = paginate("lift", filtered);
+      const rows = pageData.rows.map(l => {
+        return `<tr>
+          <td>${l.id}</td>
+          <td><a href="#" onclick="event.preventDefault();viewLift(${l.id})">${l.name}</a></td>
+          <td>${l.dur}</td>
+          <td>${l.planStart}</td>
+          <td>${l.planEnd}</td>
+          <td>${fmtDate(l.actStart)}</td>
+          <td>${fmtDate(l.actFinish)}</td>
+          <td>${barHTML(l.prog, l.prog===100?'green':'')}</td>
+          <td>${l.res}</td>
+          <td>${l.owner}</td>
+          <td>${statusOf(l.prog)}</td>
+          <td>${l.remark || '—'}</td>
+          <td>${l.updatedAt || '—'}</td>
+          <td class="ctr"><span class="op-group"><a href="#" onclick="event.preventDefault();viewLift(${l.id})">查看</a><a href="#" onclick="event.preventDefault();openLiftForm(${l.id})">编辑</a><a class="danger" href="#" onclick="event.preventDefault();deleteListItem('lift', ${l.id})">删除</a></span></td>
+        </tr>`;
+      }).join("");
+
+      return `
+        <div class="card list-card">
+          <div class="filters">
+            <div class="field"><label>任务名称</label><input class="ctl" data-filter="name" value="${f.name || ''}" placeholder="请输入任务名称"/></div>
+            <div class="field"><label>吊装设备</label><input class="ctl short" data-filter="res" value="${f.res || ''}" placeholder="请输入吊装设备"/></div>
+            <div class="field"><label>状态</label><select class="ctl short" data-filter="status"><option value="">请选择</option><option ${selected(f.status,'未开始')}>未开始</option><option ${selected(f.status,'进行中')}>进行中</option><option ${selected(f.status,'已完成')}>已完成</option></select></div>
+            <div class="field"><label>责任人</label><input class="ctl short" data-filter="owner" value="${f.owner || ''}" placeholder="请输入责任人"/></div>
+            <div style="margin-left:auto;display:flex;gap:8px">
+              <button class="btn primary" onclick="queryList('lift')">查询</button>
+              <button class="btn" onclick="resetList('lift')">重置</button>
+            </div>
+          </div>
+          <div class="card-head">
+            <div class="card-title"><span class="dot"></span>总装进度</div>
+            <div class="card-actions">
+              <button class="btn primary" onclick="openLiftForm()"><span class="plus">＋</span>新增</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="t">
+              <thead>
+                <tr>
+                  <th>#</th><th>任务名称</th>
+                  <th>工期(工作日)</th><th>计划开始</th><th>计划完成</th>
+                  <th>实际开始</th><th>实际完成</th>
+                  <th>进度</th><th>吊装设备</th>
+                  <th>责任人</th><th>状态</th><th>备注</th><th>最后更新</th><th class="ctr">操作</th>
+                </tr>
+              </thead>
+              <tbody>${rows || emptyRow(14)}</tbody>
+            </table>
+          </div>
+          ${pagerHTML('lift', pageData.total, pageData.totalPages)}
+        </div>
+      `;
+    }
+
+    // ============== 备料 · 新增/编辑/删除 ==============
+    function materialStatusText(v) {
+      return statusText(materialProgress(v));
+    }
+    function materialFormHTML(item) {
+      const v = item || {};
+      return `
+        <form class="form-grid" id="materialForm" autocomplete="off">
+          <div class="form-item">
+            <label>序号</label>
+            <input name="sequence" value="${v.id ?? '保存后自动生成'}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>材料名称<span class="req">*</span></label>
+            <input name="name" value="${v.name || ''}" placeholder="如 焊接材料"/>
+            <div class="err" data-err="name"></div>
+          </div>
+          <div class="form-item">
+            <label>规格</label>
+            <input name="spec" value="${v.spec || ''}" placeholder="如 焊丝 Φ1.2mm"/>
+          </div>
+          <div class="form-item">
+            <label>计划量（吨）<span class="req">*</span></label>
+            <input name="planQty" type="number" min="0.01" step="0.01" value="${v.planQty ?? ''}" placeholder="0.00" oninput="updateMaterialStatus()"/>
+            <div class="err" data-err="planQty"></div>
+          </div>
+          <div class="form-item">
+            <label>已到货量（吨）</label>
+            <input name="recvQty" type="number" min="0" step="0.01" value="${v.recvQty ?? ''}" placeholder="0.00" oninput="updateMaterialStatus()"/>
+            <div class="err" data-err="recvQty"></div>
+          </div>
+          <div class="form-item">
+            <label>状态</label>
+            <input name="status" value="${materialStatusText(v)}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>责任人<span class="req">*</span></label>
+            <select name="owner">
+              <option value="">请选择</option>
+              <option ${v.owner==='王希洪'?'selected':''}>王希洪</option>
+              <option ${v.owner==='李恩岩'?'selected':''}>李恩岩</option>
+              <option ${v.owner==='陈兴咪'?'selected':''}>陈兴咪</option>
+            </select>
+            <div class="err" data-err="owner"></div>
+          </div>
+          <div class="form-item">
+            <label>计划开始到货<span class="req">*</span></label>
+            <input name="planStart" type="date" value="${v.planStart || ''}"/>
+            <div class="err" data-err="planStart"></div>
+          </div>
+          <div class="form-item">
+            <label>计划完成到货<span class="req">*</span></label>
+            <input name="planEnd" type="date" value="${v.planEnd || ''}"/>
+            <div class="err" data-err="planEnd"></div>
+          </div>
+          <div class="form-item">
+            <label>实际首日到货</label>
+            <input name="actStart" type="date" value="${v.actStart || ''}"/>
+            <div class="err" data-err="actStart"></div>
+          </div>
+          <div class="form-item">
+            <label>实际末日到货</label>
+            <input name="actEnd" type="date" value="${v.actEnd || ''}"/>
+            <div class="err" data-err="actEnd"></div>
+          </div>
+          <div class="form-item">
+            <label>最后更新</label>
+            <input name="updatedAt" value="${v.updatedAt || ''}" placeholder="保存后自动填入" readonly disabled style="background:#f5f7fb;color:var(--ink-3)"/>
+          </div>
+          <div class="form-item full">
+            <label>备注</label>
+            <textarea name="remark" placeholder="如到货批次、检验情况等">${v.remark || ''}</textarea>
+          </div>
+        </form>
+      `;
+    }
+    function openMaterialForm(id) {
+      const isEdit = id != null;
+      const item = isEdit ? DATA.material.find(x => x.id === id) : null;
+      if (isEdit && !item) return;
+      $("#modalTitle").textContent = isEdit ? `编辑备料 · ${item.name}` : "新增备料";
+      $("#modalBody").innerHTML = materialFormHTML(item || {});
+      const modal = $("#modal"), mask = $("#modalMask");
+      modal.classList.add("show"); mask.classList.add("show");
+      $("#modalSave").onclick = () => saveMaterialForm(id);
+      $("#modalCancel").onclick = closeModal;
+      $("#modalClose").onclick = closeModal;
+    }
+    function resetModal() {
+      $("#modal").classList.remove("show");
+      $("#modalMask").classList.remove("show");
+      const saveBtn = $("#modalSave");
+      const cancelBtn = $("#modalCancel");
+      if (saveBtn) saveBtn.style.display = "";
+      if (cancelBtn) cancelBtn.textContent = "取消";
+    }
+    function closeModal() {
+      resetModal();
+      if (/[!@]/.test(location.hash)) history.replaceState(null, "", `#${currentTab}`);
+    }
+    function updateMaterialStatus() {
+      const form = $("#materialForm");
+      if (!form) return;
+      const statusInput = form.querySelector('[name="status"]');
+      if (!statusInput) return;
+      statusInput.value = materialStatusText({
+        planQty: form.querySelector('[name="planQty"]').value,
+        recvQty: form.querySelector('[name="recvQty"]').value
+      });
+    }
+    function saveMaterialForm(id) {
+      const form = $("#materialForm");
+      const get = (n) => form.querySelector(`[name="${n}"]`).value.trim();
+      const data = {
+        name: get("name"),
+        spec: get("spec"),
+        planQty: parseFloat(get("planQty")),
+        recvQty: parseFloat(get("recvQty") || "0"),
+        owner: get("owner"),
+        planStart: get("planStart"),
+        planEnd: get("planEnd"),
+        actStart: get("actStart") || null,
+        actEnd: get("actEnd") || null,
+        remark: form.querySelector('[name="remark"]').value.trim(),
+        updatedAt: formatNow()
+      };
+      // 校验
+      const errs = {};
+      if (!data.name) errs.name = "请输入材料名称";
+      if (!Number.isFinite(data.planQty) || data.planQty <= 0) errs.planQty = "计划量必须大于 0";
+      if (!Number.isFinite(data.recvQty) || data.recvQty < 0) errs.recvQty = "已到货量不能为负";
+      else if (Number.isFinite(data.planQty) && data.recvQty > data.planQty) errs.recvQty = "已到货量不能大于计划量";
+      if (!data.owner) errs.owner = "请选择责任人";
+      if (!data.planStart) errs.planStart = "请选择计划开始到货";
+      if (!data.planEnd) errs.planEnd = "请选择计划完成到货";
+      if (data.planStart && data.planEnd && data.planStart > data.planEnd) errs.planEnd = "计划完成不能早于计划开始";
+      if (data.actEnd && !data.actStart) errs.actStart = "请先选择实际首日到货";
+      if (data.actStart && data.actEnd && data.actStart > data.actEnd) errs.actEnd = "实际末日不能早于实际首日";
+
+      form.querySelectorAll(".err").forEach(e => e.textContent = "");
+      Object.keys(errs).forEach(k => {
+        const el = form.querySelector(`[data-err="${k}"]`);
+        if (el) el.textContent = errs[k];
+      });
+      if (Object.keys(errs).length) return;
+
+      if (id != null) {
+        const idx = DATA.material.findIndex(x => x.id === id);
+        DATA.material[idx] = Object.assign({}, DATA.material[idx], data);
+      } else {
+        const newId = nextNumericId(DATA.material);
+        DATA.material.push(Object.assign({ id: newId }, data));
+      }
+      closeModal();
+      render();
+    }
+    // 查看（只读弹窗，样式与编辑表单一致）
+    function viewMaterial(id) {
+      const item = DATA.material.find(x => x.id === id);
+      if (!item) return;
+      $("#modalTitle").textContent = "查看备料 · " + item.name;
+      $("#modalBody").innerHTML = viewMaterialFormHTML(item);
+      const saveBtn = $("#modalSave");
+      if (saveBtn) saveBtn.style.display = "none";
+      const cancelBtn = $("#modalCancel");
+      cancelBtn.textContent = "关闭";
+      const modal = $("#modal"), mask = $("#modalMask");
+      modal.classList.add("show"); mask.classList.add("show");
+      $("#modalClose").onclick = closeModal;
+      cancelBtn.onclick = closeModal;
+    }
+    // 查看弹窗 HTML：复用编辑表单结构，所有字段 disabled
+    function viewMaterialFormHTML(v) {
+      return `
+        <form class="form-grid" autocomplete="off">
+          <div class="form-item">
+            <label>序号</label>
+            <input name="sequence" value="${v.id}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>材料名称</label>
+            <input name="name" value="${v.name || ''}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>规格</label>
+            <input name="spec" value="${v.spec || ''}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>计划量（吨）</label>
+            <input name="planQty" type="number" value="${v.planQty ?? ''}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>已到货量（吨）</label>
+            <input name="recvQty" type="number" value="${v.recvQty ?? ''}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>状态</label>
+            <input name="status" value="${materialStatusText(v)}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>责任人</label>
+            <select name="owner" disabled>
+              <option ${v.owner==='王希洪'?'selected':''}>王希洪</option>
+              <option ${v.owner==='李恩岩'?'selected':''}>李恩岩</option>
+              <option ${v.owner==='陈兴咪'?'selected':''}>陈兴咪</option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label>计划开始到货</label>
+            <input name="planStart" type="date" value="${v.planStart || ''}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>计划完成到货</label>
+            <input name="planEnd" type="date" value="${v.planEnd || ''}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>实际首日到货</label>
+            <input name="actStart" type="date" value="${v.actStart || ''}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>实际末日到货</label>
+            <input name="actEnd" type="date" value="${v.actEnd || ''}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>最后更新</label>
+            <input name="updatedAt" value="${v.updatedAt || '—'}" disabled/>
+          </div>
+          <div class="form-item full">
+            <label>备注</label>
+            <textarea name="remark" disabled>${v.remark || ''}</textarea>
+          </div>
+        </form>
+      `;
+    }
+    // 暴露给内联 onclick
+    window.openMaterialForm = openMaterialForm;
+    window.viewMaterial = viewMaterial;
+    window.updateMaterialStatus = updateMaterialStatus;
+    // 点遮罩关闭弹窗
+    $("#modalMask").addEventListener("click", closeModal);
+    // ESC 关闭弹窗
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeModal();
+    });
+
+    // ============== 钢管桩 · 新增/编辑/查看 ==============
+    // 与列表字段保持一致：序号 / 编号 / 规格 / 计划起止 / 实际起止 / 制作进度 / 状态 / 责任人 / 最后更新
+    function pileFormFieldsHTML(v, mode) {
+      const disabled = mode === "view" ? "disabled" : "";
+      const readonlyStyle = mode === "view"
+        ? 'style="background:#f5f7fb;color:var(--ink-2)"'
+        : 'style="background:#f5f7fb;color:var(--ink-3)"';
+      const ownerOptions = ["刘刚", "胡顺雪"].map(n =>
+        `<option ${v.owner===n?'selected':''}>${n}</option>`).join("");
+      const sequence = v.id ? DATA.piles.findIndex(p => p.id === v.id) + 1 : "保存后自动生成";
+      return `
+        <form class="form-grid" id="pileForm" autocomplete="off">
+          <div class="form-item">
+            <label>序号</label>
+            <input name="sequence" value="${sequence}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>编号<span class="req">*</span></label>
+            <input name="id" value="${v.id || ''}" placeholder="如 Z11" ${disabled}/>
+            <div class="err" data-err="id"></div>
+          </div>
+          <div class="form-item">
+            <label>规格</label>
+            <input name="spec" value="${v.spec || ''}" placeholder="如 Φ4400×114m" ${disabled}/>
+          </div>
+          <div class="form-item">
+            <label>计划开始<span class="req">*</span></label>
+            <input name="planStart" type="date" value="${v.planStart || ''}" ${disabled}/>
+            <div class="err" data-err="planStart"></div>
+          </div>
+          <div class="form-item">
+            <label>计划完成<span class="req">*</span></label>
+            <input name="planEnd" type="date" value="${v.planEnd || ''}" ${disabled}/>
+            <div class="err" data-err="planEnd"></div>
+          </div>
+          <div class="form-item">
+            <label>实际开始</label>
+            <input name="actStart" type="date" value="${v.actStart || ''}" ${disabled}/>
+            <div class="err" data-err="actStart"></div>
+          </div>
+          <div class="form-item">
+            <label>实际完成</label>
+            <input name="actFinish" type="date" value="${v.actFinish || ''}" ${disabled}/>
+            <div class="err" data-err="actFinish"></div>
+          </div>
+          <div class="form-item">
+            <label>制作进度（%）</label>
+            <input name="prog" type="number" min="0" max="100" step="1" value="${v.prog ?? ''}" placeholder="0-100" oninput="updatePileStatus(this.value)" ${disabled}/>
+            <div class="err" data-err="prog"></div>
+          </div>
+          <div class="form-item">
+            <label>状态</label>
+            <input name="status" value="${statusText(Number(v.prog) || 0)}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>责任人<span class="req">*</span></label>
+            <select name="owner" ${disabled}>
+              <option value="">请选择</option>
+              ${ownerOptions}
+            </select>
+            <div class="err" data-err="owner"></div>
+          </div>
+          <div class="form-item">
+            <label>最后更新</label>
+            <input name="updatedAt" value="${v.updatedAt || (mode==='view' ? '—' : '')}" ${mode==='view' ? 'disabled' : 'readonly disabled'} placeholder="保存后自动填入" ${readonlyStyle}/>
+          </div>
+        </form>
+      `;
+    }
+
+    function openPileForm(id) {
+      const isEdit = id != null;
+      const item = isEdit ? DATA.piles.find(x => x.id === id) : null;
+      if (isEdit && !item) return;
+      $("#modalTitle").textContent = isEdit ? `编辑钢管桩 · ${item.id}` : "新增钢管桩";
+      $("#modalBody").innerHTML = pileFormFieldsHTML(item || {}, "edit");
+      const modal = $("#modal"), mask = $("#modalMask");
+      modal.classList.add("show"); mask.classList.add("show");
+      $("#modalSave").onclick = () => savePileForm(id);
+      $("#modalCancel").onclick = closeModal;
+      $("#modalClose").onclick = closeModal;
+    }
+    function savePileForm(id) {
+      const form = $("#pileForm");
+      const get = (n) => form.querySelector(`[name="${n}"]`).value.trim();
+      const data = {
+        id: get("id"),
+        spec: get("spec"),
+        planStart: get("planStart"),
+        planEnd: get("planEnd"),
+        actStart: get("actStart") || null,
+        actFinish: get("actFinish") || null,
+        prog: Number(get("prog") || "0"),
+        owner: get("owner"),
+        updatedAt: formatNow()
+      };
+      const errs = {};
+      if (!data.id) errs.id = "请输入编号";
+      else if (!/^[A-Za-z0-9_-]+$/.test(data.id)) errs.id = "编号仅支持字母、数字、下划线和短横线";
+      else if (DATA.piles.some(p => p.id === data.id && p.id !== id)) errs.id = "编号已存在";
+      if (!Number.isInteger(data.prog) || data.prog < 0 || data.prog > 100) errs.prog = "制作进度必须为 0-100 的整数";
+      if (!data.owner) errs.owner = "请选择责任人";
+      if (!data.planStart) errs.planStart = "请选择计划开始";
+      if (!data.planEnd) errs.planEnd = "请选择计划完成";
+      if (data.planStart && data.planEnd && data.planStart > data.planEnd) errs.planEnd = "计划完成不能早于计划开始";
+      if (data.actFinish && !data.actStart) errs.actStart = "请先选择实际开始";
+      if (data.actStart && data.actFinish && data.actStart > data.actFinish) errs.actFinish = "实际完成不能早于实际开始";
+
+      form.querySelectorAll(".err").forEach(e => e.textContent = "");
+      Object.keys(errs).forEach(k => {
+        const el = form.querySelector(`[data-err="${k}"]`);
+        if (el) el.textContent = errs[k];
+      });
+      if (Object.keys(errs).length) return;
+
+      if (id != null) {
+        const idx = DATA.piles.findIndex(x => x.id === id);
+        DATA.piles[idx] = Object.assign({}, DATA.piles[idx], data);
+      } else {
+        DATA.piles.push(Object.assign({}, data));
+      }
+      closeModal();
+      render();
+    }
+    function viewPile(id) {
+      const item = DATA.piles.find(x => x.id === id);
+      if (!item) return;
+      $("#modalTitle").textContent = "查看钢管桩 · " + item.id;
+      $("#modalBody").innerHTML = pileFormFieldsHTML(item, "view");
+      const saveBtn = $("#modalSave");
+      if (saveBtn) saveBtn.style.display = "none";
+      const cancelBtn = $("#modalCancel");
+      cancelBtn.textContent = "关闭";
+      const modal = $("#modal"), mask = $("#modalMask");
+      modal.classList.add("show"); mask.classList.add("show");
+      $("#modalClose").onclick = closeModal;
+      cancelBtn.onclick = closeModal;
+    }
+    function updatePileStatus(value) {
+      const statusInput = $("#pileForm [name='status']");
+      if (statusInput) statusInput.value = statusText(Number(value) || 0);
+    }
+    // 暴露给内联 onclick
+    window.openPileForm = openPileForm;
+    window.viewPile = viewPile;
+    window.updatePileStatus = updatePileStatus;
+
+    // ============== 主体构件 · 新增/编辑/查看 ==============
+    // 与列表字段保持一致：序号 / 构件名称 / 所属结构 / 计划起止 / 实际起止 / 制作进度 / 状态 / 责任人 / 备注 / 最后更新
+    function mainFormFieldsHTML(v, mode) {
+      const disabled = mode === "view" ? "disabled" : "";
+      const readonlyStyle = mode === "view"
+        ? 'style="background:#f5f7fb;color:var(--ink-2)"'
+        : 'style="background:#f5f7fb;color:var(--ink-3)"';
+      const ownerOptions = ["陈兴咪", "孙炳生"].map(n =>
+        `<option ${v.owner===n?'selected':''}>${n}</option>`).join("");
+      const structOptions = ["2轴", "6轴", "A轴", "C轴", "E轴"].map(s =>
+        `<option ${v.struct===s?'selected':''}>${s}</option>`).join("");
+      return `
+        <form class="form-grid" id="mainForm" autocomplete="off">
+          <div class="form-item">
+            <label>序号</label>
+            <input name="sequence" value="${v.id ?? '保存后自动生成'}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>构件名称<span class="req">*</span></label>
+            <input name="name" value="${v.name || ''}" placeholder="如 2轴下主片" ${disabled}/>
+            <div class="err" data-err="name"></div>
+          </div>
+          <div class="form-item">
+            <label>所属结构<span class="req">*</span></label>
+            <select name="struct" ${disabled}>
+              <option value="">请选择</option>
+              ${structOptions}
+            </select>
+            <div class="err" data-err="struct"></div>
+          </div>
+          <div class="form-item">
+            <label>计划开始<span class="req">*</span></label>
+            <input name="planStart" type="date" value="${v.planStart || ''}" ${disabled}/>
+            <div class="err" data-err="planStart"></div>
+          </div>
+          <div class="form-item">
+            <label>计划完成<span class="req">*</span></label>
+            <input name="planEnd" type="date" value="${v.planEnd || ''}" ${disabled}/>
+            <div class="err" data-err="planEnd"></div>
+          </div>
+          <div class="form-item">
+            <label>实际开始</label>
+            <input name="actStart" type="date" value="${v.actStart || ''}" ${disabled}/>
+            <div class="err" data-err="actStart"></div>
+          </div>
+          <div class="form-item">
+            <label>实际完成</label>
+            <input name="actFinish" type="date" value="${v.actFinish || ''}" ${disabled}/>
+            <div class="err" data-err="actFinish"></div>
+          </div>
+          <div class="form-item">
+            <label>制作进度（%）</label>
+            <input name="prog" type="number" min="0" max="100" step="1" value="${v.prog ?? ''}" placeholder="0-100" oninput="updateMainStatus(this.value)" ${disabled}/>
+            <div class="err" data-err="prog"></div>
+          </div>
+          <div class="form-item">
+            <label>状态</label>
+            <input name="status" value="${statusText(Number(v.prog) || 0)}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>责任人<span class="req">*</span></label>
+            <select name="owner" ${disabled}>
+              <option value="">请选择</option>
+              ${ownerOptions}
+            </select>
+            <div class="err" data-err="owner"></div>
+          </div>
+          <div class="form-item">
+            <label>最后更新</label>
+            <input name="updatedAt" value="${v.updatedAt || (mode==='view' ? '—' : '')}" ${mode==='view' ? 'disabled' : 'readonly disabled'} placeholder="保存后自动填入" ${readonlyStyle}/>
+          </div>
+          <div class="form-item full">
+            <label>备注</label>
+            <textarea name="remark" placeholder="如 转入合拢、组对完成等" ${disabled}>${v.remark || ''}</textarea>
+          </div>
+        </form>
+      `;
+    }
+    function openMainForm(id) {
+      const isEdit = id != null;
+      const item = isEdit ? DATA.mains.find(x => x.id === id) : null;
+      if (isEdit && !item) return;
+      $("#modalTitle").textContent = isEdit ? `编辑主体构件 · ${item.name}` : "新增主体构件";
+      $("#modalBody").innerHTML = mainFormFieldsHTML(item || {}, "edit");
+      const modal = $("#modal"), mask = $("#modalMask");
+      modal.classList.add("show"); mask.classList.add("show");
+      $("#modalSave").onclick = () => saveMainForm(id);
+      $("#modalCancel").onclick = closeModal;
+      $("#modalClose").onclick = closeModal;
+    }
+    function saveMainForm(id) {
+      const form = $("#mainForm");
+      const get = (n) => form.querySelector(`[name="${n}"]`).value.trim();
+      const data = {
+        name: get("name"),
+        struct: get("struct"),
+        planStart: get("planStart"),
+        planEnd: get("planEnd"),
+        actStart: get("actStart") || null,
+        actFinish: get("actFinish") || null,
+        prog: Number(get("prog") || "0"),
+        owner: get("owner"),
+        remark: form.querySelector('[name="remark"]').value.trim(),
+        updatedAt: formatNow()
+      };
+      const errs = {};
+      if (!data.name) errs.name = "请输入构件名称";
+      if (!data.struct) errs.struct = "请选择所属结构";
+      if (!Number.isInteger(data.prog) || data.prog < 0 || data.prog > 100) errs.prog = "制作进度必须为 0-100 的整数";
+      if (!data.owner) errs.owner = "请选择责任人";
+      if (!data.planStart) errs.planStart = "请选择计划开始";
+      if (!data.planEnd) errs.planEnd = "请选择计划完成";
+      if (data.planStart && data.planEnd && data.planStart > data.planEnd) errs.planEnd = "计划完成不能早于计划开始";
+      if (data.actFinish && !data.actStart) errs.actStart = "请先选择实际开始";
+      if (data.actStart && data.actFinish && data.actStart > data.actFinish) errs.actFinish = "实际完成不能早于实际开始";
+
+      form.querySelectorAll(".err").forEach(e => e.textContent = "");
+      Object.keys(errs).forEach(k => {
+        const el = form.querySelector(`[data-err="${k}"]`);
+        if (el) el.textContent = errs[k];
+      });
+      if (Object.keys(errs).length) return;
+
+      if (id != null) {
+        const idx = DATA.mains.findIndex(x => x.id === id);
+        DATA.mains[idx] = Object.assign({}, DATA.mains[idx], data);
+      } else {
+        const newId = nextNumericId(DATA.mains);
+        DATA.mains.push(Object.assign({ id: newId, qty: 0 }, data));
+      }
+      closeModal();
+      render();
+    }
+    function viewMain(id) {
+      const item = DATA.mains.find(x => x.id === id);
+      if (!item) return;
+      $("#modalTitle").textContent = "查看主体构件 · " + item.name;
+      $("#modalBody").innerHTML = mainFormFieldsHTML(item, "view");
+      const saveBtn = $("#modalSave");
+      if (saveBtn) saveBtn.style.display = "none";
+      const cancelBtn = $("#modalCancel");
+      cancelBtn.textContent = "关闭";
+      const modal = $("#modal"), mask = $("#modalMask");
+      modal.classList.add("show"); mask.classList.add("show");
+      $("#modalClose").onclick = closeModal;
+      cancelBtn.onclick = closeModal;
+    }
+    function updateMainStatus(value) {
+      const statusInput = $("#mainForm [name='status']");
+      if (statusInput) statusInput.value = statusText(Number(value) || 0);
+    }
+    // 暴露给内联 onclick
+    window.openMainForm = openMainForm;
+    window.viewMain = viewMain;
+    window.updateMainStatus = updateMainStatus;
+
+    // ============== 附属构件 · 新增/编辑/查看 ==============
+    // 与列表字段保持一致：# / 构件名称 / 计划起止 / 实际起止 / 制作进度 / 状态 / 责任人 / 备注 / 最后更新
+    function subStatusText(prog) {
+      if (prog === "" || Number(prog) === 0) return "未开始";
+      if (Number(prog) === 100) return "已完成";
+      return "进行中";
+    }
+    function subFormFieldsHTML(v, mode) {
+      const disabled = mode === "view" ? "disabled" : "";
+      const ownerOptions = ["陈兴咪", "李恩岩", "王希洪"].map(n =>
+        `<option ${v.owner===n?'selected':''}>${n}</option>`).join("");
+      const prog = v.prog ?? 0;
+      return `
+        <form class="form-grid" id="subForm" autocomplete="off">
+          <div class="form-item">
+            <label>序号</label>
+            <input name="id" value="${v.id ?? '保存后自动生成'}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>构件名称<span class="req">*</span></label>
+            <input name="name" value="${v.name || ''}" placeholder="如 桩靴、浮筒" ${disabled}/>
+            <div class="err" data-err="name"></div>
+          </div>
+          <div class="form-item">
+            <label>计划开始<span class="req">*</span></label>
+            <input name="planStart" type="date" value="${v.planStart || ''}" ${disabled}/>
+            <div class="err" data-err="planStart"></div>
+          </div>
+          <div class="form-item">
+            <label>计划完成<span class="req">*</span></label>
+            <input name="planEnd" type="date" value="${v.planEnd || ''}" ${disabled}/>
+            <div class="err" data-err="planEnd"></div>
+          </div>
+          <div class="form-item">
+            <label>实际开始</label>
+            <input name="actStart" type="date" value="${v.actStart || ''}" ${disabled}/>
+            <div class="err" data-err="actStart"></div>
+          </div>
+          <div class="form-item">
+            <label>实际完成</label>
+            <input name="actFinish" type="date" value="${v.actFinish || ''}" ${disabled}/>
+            <div class="err" data-err="actFinish"></div>
+          </div>
+          <div class="form-item">
+            <label>制作进度（%）</label>
+            <input name="prog" type="number" min="0" max="100" step="1" value="${prog}" placeholder="0-100" oninput="updateSubStatus(this.value)" ${disabled}/>
+            <div class="err" data-err="prog"></div>
+          </div>
+          <div class="form-item">
+            <label>状态</label>
+            <input name="status" value="${subStatusText(prog)}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>责任人<span class="req">*</span></label>
+            <select name="owner" ${disabled}>
+              <option value="">请选择</option>
+              ${ownerOptions}
+            </select>
+            <div class="err" data-err="owner"></div>
+          </div>
+          <div class="form-item">
+            <label>最后更新</label>
+            <input name="updatedAt" value="${v.updatedAt || (mode==='view' ? '—' : '保存后自动生成')}" disabled/>
+          </div>
+          <div class="form-item full">
+            <label>备注</label>
+            <textarea name="remark" placeholder="请输入制作情况说明" ${disabled}>${v.remark || ''}</textarea>
+          </div>
+        </form>
+      `;
+    }
+    function updateSubStatus(value) {
+      const statusInput = $("#subForm [name='status']");
+      if (statusInput) statusInput.value = subStatusText(value);
+    }
+    function openSubForm(id) {
+      const isEdit = id != null;
+      const item = isEdit ? DATA.subs.find(x => x.id === id) : null;
+      if (isEdit && !item) return;
+      const saveBtn = $("#modalSave");
+      const cancelBtn = $("#modalCancel");
+      saveBtn.style.display = "";
+      cancelBtn.textContent = "取消";
+      $("#modalTitle").textContent = isEdit ? `编辑附属构件 · ${item.name}` : "新增附属构件";
+      $("#modalBody").innerHTML = subFormFieldsHTML(item || {}, "edit");
+      $("#modal").classList.add("show");
+      $("#modalMask").classList.add("show");
+      saveBtn.onclick = () => saveSubForm(id);
+      cancelBtn.onclick = closeModal;
+      $("#modalClose").onclick = closeModal;
+    }
+    function saveSubForm(id) {
+      const form = $("#subForm");
+      const get = (n) => form.querySelector(`[name="${n}"]`).value.trim();
+      const data = {
+        name: get("name"),
+        planStart: get("planStart"),
+        planEnd: get("planEnd"),
+        actStart: get("actStart") || null,
+        actFinish: get("actFinish") || null,
+        prog: Number(get("prog") || "0"),
+        owner: get("owner"),
+        remark: form.querySelector('[name="remark"]').value.trim(),
+        updatedAt: formatNow()
+      };
+      const errs = {};
+      if (!data.name) errs.name = "请输入构件名称";
+      if (!Number.isInteger(data.prog) || data.prog < 0 || data.prog > 100) errs.prog = "制作进度必须为 0-100 的整数";
+      if (!data.owner) errs.owner = "请选择责任人";
+      if (!data.planStart) errs.planStart = "请选择计划开始";
+      if (!data.planEnd) errs.planEnd = "请选择计划完成";
+      if (data.planStart && data.planEnd && data.planStart > data.planEnd) errs.planEnd = "计划完成不能早于计划开始";
+      if (data.actFinish && !data.actStart) errs.actStart = "请先选择实际开始";
+      if (data.actStart && data.actFinish && data.actStart > data.actFinish) errs.actFinish = "实际完成不能早于实际开始";
+
+      form.querySelectorAll(".err").forEach(e => e.textContent = "");
+      Object.keys(errs).forEach(k => {
+        const el = form.querySelector(`[data-err="${k}"]`);
+        if (el) el.textContent = errs[k];
+      });
+      if (Object.keys(errs).length) return;
+
+      if (id != null) {
+        const idx = DATA.subs.findIndex(x => x.id === id);
+        DATA.subs[idx] = Object.assign({}, DATA.subs[idx], data);
+      } else {
+        const newId = nextNumericId(DATA.subs);
+        DATA.subs.push(Object.assign({
+          id: newId,
+          code: `SUB-AUTO-${String(newId).padStart(3, "0")}`,
+          cls: "—",
+          qty: 0,
+          hot: false
+        }, data));
+      }
+      closeModal();
+      render();
+    }
+    function viewSub(id) {
+      const item = DATA.subs.find(x => x.id === id);
+      if (!item) return;
+      $("#modalTitle").textContent = "查看附属构件 · " + item.name;
+      $("#modalBody").innerHTML = subFormFieldsHTML(item, "view");
+      const saveBtn = $("#modalSave");
+      const cancelBtn = $("#modalCancel");
+      saveBtn.style.display = "none";
+      cancelBtn.textContent = "关闭";
+      $("#modal").classList.add("show");
+      $("#modalMask").classList.add("show");
+      cancelBtn.onclick = closeModal;
+      $("#modalClose").onclick = closeModal;
+    }
+    window.openSubForm = openSubForm;
+    window.viewSub = viewSub;
+    window.updateSubStatus = updateSubStatus;
+
+    // ============== 总装进度 · 新增/编辑/查看 ==============
+    // 与列表字段保持一致：# / 任务名称 / 工期 / 计划起止 / 实际起止 / 进度 / 吊装设备 / 责任人 / 状态 / 备注 / 最后更新
+    function liftStatusText(prog) {
+      if (prog === "" || Number(prog) === 0) return "未开始";
+      if (Number(prog) === 100) return "已完成";
+      return "进行中";
+    }
+    function liftFormFieldsHTML(v, mode) {
+      const disabled = mode === "view" ? "disabled" : "";
+      const prog = v.prog ?? 0;
+      return `
+        <form class="form-grid" id="liftForm" autocomplete="off">
+          <div class="form-item">
+            <label>序号</label>
+            <input name="id" value="${v.id ?? '保存后自动生成'}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>任务名称<span class="req">*</span></label>
+            <input name="name" value="${v.name || ''}" placeholder="如 浮筒吊装" ${disabled}/>
+            <div class="err" data-err="name"></div>
+          </div>
+          <div class="form-item">
+            <label>工期（工作日）<span class="req">*</span></label>
+            <input name="dur" type="number" min="1" step="1" value="${v.dur ?? ''}" placeholder="请输入工作日" ${disabled}/>
+            <div class="err" data-err="dur"></div>
+          </div>
+          <div class="form-item">
+            <label>吊装设备</label>
+            <input name="res" value="${v.res && v.res !== '—' ? v.res : ''}" placeholder="如 1000t龙门吊" ${disabled}/>
+          </div>
+          <div class="form-item">
+            <label>计划开始<span class="req">*</span></label>
+            <input name="planStart" type="date" value="${v.planStart || ''}" ${disabled}/>
+            <div class="err" data-err="planStart"></div>
+          </div>
+          <div class="form-item">
+            <label>计划完成<span class="req">*</span></label>
+            <input name="planEnd" type="date" value="${v.planEnd || ''}" ${disabled}/>
+            <div class="err" data-err="planEnd"></div>
+          </div>
+          <div class="form-item">
+            <label>实际开始</label>
+            <input name="actStart" type="date" value="${v.actStart || ''}" ${disabled}/>
+            <div class="err" data-err="actStart"></div>
+          </div>
+          <div class="form-item">
+            <label>实际完成</label>
+            <input name="actFinish" type="date" value="${v.actFinish || ''}" ${disabled}/>
+            <div class="err" data-err="actFinish"></div>
+          </div>
+          <div class="form-item">
+            <label>进度（%）</label>
+            <input name="prog" type="number" min="0" max="100" step="1" value="${prog}" placeholder="0-100" oninput="updateLiftStatus(this.value)" ${disabled}/>
+            <div class="err" data-err="prog"></div>
+          </div>
+          <div class="form-item">
+            <label>状态</label>
+            <input name="status" value="${liftStatusText(prog)}" disabled/>
+          </div>
+          <div class="form-item">
+            <label>责任人<span class="req">*</span></label>
+            <input name="owner" value="${v.owner || ''}" placeholder="请输入责任人" ${disabled}/>
+            <div class="err" data-err="owner"></div>
+          </div>
+          <div class="form-item">
+            <label>最后更新</label>
+            <input name="updatedAt" value="${v.updatedAt || (mode==='view' ? '—' : '保存后自动生成')}" disabled/>
+          </div>
+          <div class="form-item full">
+            <label>备注</label>
+            <textarea name="remark" placeholder="请输入任务进展或前置条件" ${disabled}>${v.remark && v.remark !== '—' ? v.remark : ''}</textarea>
+          </div>
+        </form>
+      `;
+    }
+    function updateLiftStatus(value) {
+      const statusInput = $("#liftForm [name='status']");
+      if (statusInput) statusInput.value = liftStatusText(value);
+    }
+    function openLiftForm(id) {
+      const isEdit = id != null;
+      const item = isEdit ? DATA.lifts.find(x => x.id === id) : null;
+      if (isEdit && !item) return;
+      const saveBtn = $("#modalSave");
+      const cancelBtn = $("#modalCancel");
+      saveBtn.style.display = "";
+      cancelBtn.textContent = "取消";
+      $("#modalTitle").textContent = isEdit ? `编辑总装任务 · ${item.name}` : "新增总装任务";
+      $("#modalBody").innerHTML = liftFormFieldsHTML(item || {}, "edit");
+      $("#modal").classList.add("show");
+      $("#modalMask").classList.add("show");
+      saveBtn.onclick = () => saveLiftForm(id);
+      cancelBtn.onclick = closeModal;
+      $("#modalClose").onclick = closeModal;
+    }
+    function saveLiftForm(id) {
+      const form = $("#liftForm");
+      const get = (n) => form.querySelector(`[name="${n}"]`).value.trim();
+      const data = {
+        name: get("name"),
+        dur: Number(get("dur")),
+        planStart: get("planStart"),
+        planEnd: get("planEnd"),
+        actStart: get("actStart") || null,
+        actFinish: get("actFinish") || null,
+        prog: Number(get("prog") || "0"),
+        res: get("res") || "—",
+        owner: get("owner"),
+        remark: form.querySelector('[name="remark"]').value.trim() || "—",
+        updatedAt: formatNow()
+      };
+      const errs = {};
+      if (!data.name) errs.name = "请输入任务名称";
+      if (!Number.isInteger(data.dur) || data.dur < 1) errs.dur = "工期必须为大于 0 的整数";
+      if (!Number.isInteger(data.prog) || data.prog < 0 || data.prog > 100) errs.prog = "进度必须为 0-100 的整数";
+      if (!data.owner) errs.owner = "请输入责任人";
+      if (!data.planStart) errs.planStart = "请选择计划开始";
+      if (!data.planEnd) errs.planEnd = "请选择计划完成";
+      if (data.planStart && data.planEnd && data.planStart > data.planEnd) errs.planEnd = "计划完成不能早于计划开始";
+      if (data.actFinish && !data.actStart) errs.actStart = "请先选择实际开始";
+      if (data.actStart && data.actFinish && data.actStart > data.actFinish) errs.actFinish = "实际完成不能早于实际开始";
+
+      form.querySelectorAll(".err").forEach(e => e.textContent = "");
+      Object.keys(errs).forEach(k => {
+        const el = form.querySelector(`[data-err="${k}"]`);
+        if (el) el.textContent = errs[k];
+      });
+      if (Object.keys(errs).length) return;
+
+      if (id != null) {
+        const idx = DATA.lifts.findIndex(x => x.id === id);
+        DATA.lifts[idx] = Object.assign({}, DATA.lifts[idx], data);
+      } else {
+        const newId = nextNumericId(DATA.lifts);
+        DATA.lifts.push(Object.assign({
+          id: newId,
+          code: `LIFT-AUTO-${String(newId).padStart(3, "0")}`,
+          org: "海力"
+        }, data));
+      }
+      closeModal();
+      render();
+    }
+    function viewLift(id) {
+      const item = DATA.lifts.find(x => x.id === id);
+      if (!item) return;
+      $("#modalTitle").textContent = "查看总装任务 · " + item.name;
+      $("#modalBody").innerHTML = liftFormFieldsHTML(item, "view");
+      const saveBtn = $("#modalSave");
+      const cancelBtn = $("#modalCancel");
+      saveBtn.style.display = "none";
+      cancelBtn.textContent = "关闭";
+      $("#modal").classList.add("show");
+      $("#modalMask").classList.add("show");
+      cancelBtn.onclick = closeModal;
+      $("#modalClose").onclick = closeModal;
+    }
+    window.openLiftForm = openLiftForm;
+    window.viewLift = viewLift;
+    window.updateLiftStatus = updateLiftStatus;
+
+    // ============== 路由 ==============
+    let currentTab = "overview";
+    const VALID_TABS = ["overview", "material", "pile", "main", "sub", "lift"];
+    function applyTab(tab) {
+      currentTab = tab;
+      $$("#tabs .tab").forEach(el => el.classList.toggle("active", el.dataset.tab === tab));
+      render();
+    }
+    function goto(tab) {
+      if (!VALID_TABS.includes(tab)) return;
+      const target = `#${tab}`;
+      if (location.hash === target) applyTab(tab);
+      else location.hash = target;
+    }
+
+    function render() {
+      let html = "";
+      if (currentTab === "overview") html = renderOverview();
+      if (currentTab === "material") html = renderMaterial();
+      if (currentTab === "pile") html = renderPiles();
+      if (currentTab === "main") html = renderMains();
+      if (currentTab === "sub") html = renderSubs();
+      if (currentTab === "lift") html = renderLifts();
+      $("#content").innerHTML = html;
+    }
+
+    function routeFromHash() {
+      const path = decodeURIComponent((location.hash || "").slice(1)).split("?")[0];
+      const match = path.match(/^([a-z]+)(?:@([^!]+))?(?:!(new|view|edit)(?:=(.+))?)?$/);
+      if (!match || !VALID_TABS.includes(match[1])) {
+        history.replaceState(null, "", "#overview");
+        resetModal();
+        applyTab("overview");
+        return;
+      }
+
+      const [, tab, anchorId, action, actionId] = match;
+      resetModal();
+      applyTab(tab);
+      if (tab === "overview") {
+        if (action || anchorId) history.replaceState(null, "", "#overview");
+        return;
+      }
+      if (!action && !anchorId) return;
+
+      const collections = { material: DATA.material, pile: DATA.piles, main: DATA.mains, sub: DATA.subs, lift: DATA.lifts };
+      const handlers = {
+        material: { new: openMaterialForm, view: viewMaterial, edit: openMaterialForm },
+        pile: { new: openPileForm, view: viewPile, edit: openPileForm },
+        main: { new: openMainForm, view: viewMain, edit: openMainForm },
+        sub: { new: openSubForm, view: viewSub, edit: openSubForm },
+        lift: { new: openLiftForm, view: viewLift, edit: openLiftForm }
+      };
+      const routeAction = action || "view";
+      const rawId = actionId || anchorId || (collections[tab][0] && collections[tab][0].id);
+      const id = tab === "pile" ? rawId : Number(rawId);
+      requestAnimationFrame(() => {
+        if (routeAction === "new") handlers[tab].new();
+        else if (rawId != null && handlers[tab][routeAction]) handlers[tab][routeAction](id);
+      });
+    }
+
+    $$("#tabs .tab").forEach(el => el.addEventListener("click", () => goto(el.dataset.tab)));
+    window.addEventListener("hashchange", routeFromHash);
+
+    // 暴露给内联事件
+    window.goto = goto;
+
+    routeFromHash();
+  </script>
+</body>
+</html>
